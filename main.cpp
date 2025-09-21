@@ -33,23 +33,50 @@ void pre_auton(void) {
 double kp = 0.0;
 double kd = 0.0;
 double ki = 0.0;
-
+float wheel_diameter = 3.75;
+float pi = 3.14:
+float wheel_circumfrence = wheel_diameter*pi;
+int desired_value_deg = 200;
 int error;
-int prev_error;
+int prev_error=0;
 int derivitive;
-int intergral;
-bool enable_pid = true 
+int intergral=0;
+bool enable_pid = true; 
 int PID_Drive(){
   while(PID_Drive){
+  // Grabs the pos from left motors
+  int LMB_pos = LMB.position(degrees);
+  int LMM_pos = LMM.position(degrees);
+  int LMF_pos = LMF_pos.position(degrees);
+
+  // Grabs the pos from right motors
+  int RMBB_pos = RMB.position(degrees);
+  int RMM_pos = RMM.position(degrees);
+  int RMF_pos = RMF_pos.position(degrees);
+
+  // Gets avg pos to see the distance traveled
+  int avg_pos = (LMB_pos+LMM_pos+LMR_pos+RMB_pos+RMM_pos+RMR_pos)/2;
+
+  // Checks error for porp
+  int error = avg_pos- desired_value;
+
+  // Checks error for Intergral
+  total_error+= error;
+
+  // Checks error for derivitive
+  int derivitive = erro-prev_error
+  double motor_power = kp*error+kd*derivitive+ki*intergral;
     
     prev_error=error;
     task::sleep(20);
   }
+  return(1);
 }
 void autonomous(void) {
-  // ..........................................................................
-  // Insert autonomous user code here.
-  // ..........................................................................
+  vex::task PID_IS_GOATED(PID_Drive)
+
+
+
 }
 
 /*---------------------------------------------------------------------------*/
