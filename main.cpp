@@ -30,27 +30,42 @@ inertial gyro(PORT7);
 void pre_auton(void) {
 
 }
+// Lateral movment
 double kp = 0.0;
 double kd = 0.0;
 double ki = 0.0;
-float wheel_diameter = 3.75;
-float pi = 3.14:
-float wheel_circumfrence = wheel_diameter*pi;
 int desired_value_deg = 200;
 int error;
 int prev_error=0;
 int derivitive;
 int intergral=0;
+// Genreral info
+float wheel_diameter = 3.75;
+float pi = 3.14:
+float wheel_circumfrence = wheel_diameter*pi;
+// Angular Movment
+double turn_kp = 0.0;
+double turn_kd = 0.0;
+double turn_ki = 0.0;
+int desired_turn = 0;
+
+int turn_error;
+int turn_prev_error=0;
+int turn_derivitive;
+int turn_intergral=0;
+
 bool enable_pid = true; 
-int PID_Drive(){
+int PID_Drive(desired_value_deg,desired_turn){
   while(PID_Drive){
+// Lateral displacement 
+
   // Grabs the pos from left motors
   int LMB_pos = LMB.position(degrees);
   int LMM_pos = LMM.position(degrees);
   int LMF_pos = LMF_pos.position(degrees);
 
   // Grabs the pos from right motors
-  int RMBB_pos = RMB.position(degrees);
+  int RMB_pos = RMB.position(degrees);
   int RMM_pos = RMM.position(degrees);
   int RMF_pos = RMF_pos.position(degrees);
 
@@ -61,17 +76,34 @@ int PID_Drive(){
   int error = avg_pos- desired_value;
 
   // Checks error for Intergral
-  total_error+= error;
+  intergral+= error;
 
   // Checks error for derivitive
   int derivitive = erro-prev_error
   double motor_power = kp*error+kd*derivitive+ki*intergral;
-    
+  // Motors go forward at desired speed to reach their target dist
+  LMB.spin(forward, motor_power, voltageUnits::volt);
+  LMM.spin(forward, motor_power, voltageUnits::volt);
+  LMF.spin(forward, motor_power, voltageUnits::volt);
+
+  RMB.spin(forward, -motor_power, voltageUnits::volt);
+  RMM.spin(forward, -motor_power, voltageUnits::volt);
+  RMF.spin(forward, -motor_power, voltageUnits::volt);
+
+  // Turn
+  int avg_turn = (LMB_pos+LMM_pos+LMF_pos)-(RMB_pos+RMM_pos+RMF_pos);
+  int turn_error = avg_turn-desired_turn;
+  turn_intergral+=turn_error;
+  int derivitive = turn_error-turn_prev_error;
+  double turn_motor_power = turn_kp*turn_error+turn_kd*turn_derivitive+turn_ki*turn_intergral;
+
+
     prev_error=error;
     task::sleep(20);
   }
   return(1);
 }
+
 void autonomous(void) {
   vex::task PID_IS_GOATED(PID_Drive)
 
@@ -79,46 +111,27 @@ void autonomous(void) {
 
 }
 
-/*---------------------------------------------------------------------------*/
-/*                                                                           */
-/*                              User Control Task                            */
-/*                                                                           */
-/*  This task is used to control your robot during the user control phase of */
-/*  a VEX Competition.                                                       */
-/*                                                                           */
-/*  You must modify the code to add your own robot specific commands here.   */
-/*---------------------------------------------------------------------------*/
-
 void usercontrol(void) {
-  // User control code here, inside the loop
+
   while (1) {
-    // This is the main execution loop for the user control program.
-    // Each time through the loop your program should update motor + servo
-    // values based on feedback from the joysticks.
 
-    // ........................................................................
-    // Insert user code here. This is where you use the joystick values to
-    // update your motors, etc.
-    // ........................................................................
 
-    wait(20, msec); // Sleep the task for a short amount of time to
-                    // prevent wasted resources.
+    wait(20, msec); 
   }
 }
 
-//
-// Main will set up the competition functions and callbacks.
-//
+
 int main() {
-  // Set up callbacks for autonomous and driver control periods.
+
   Competition.autonomous(autonomous);
   Competition.drivercontrol(usercontrol);
 
-  // Run the pre-autonomous function.
+
   pre_auton();
 
-  // Prevent main from exiting with an infinite loop.
+
   while (true) {
     wait(100, msec);
   }
 }
+
