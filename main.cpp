@@ -71,10 +71,8 @@ int PID_Drive(int desired_value, int desired_turn){
 
   // Gets avg pos to see the distance traveled
   int avg_pos_deg = (LMB_pos+LMM_pos+LMR_pos+RMB_pos+RMM_pos+RMR_pos)/2;
-  if (avg_pos_deg == 360){
-    avg_pos_deg = 0;
-    turns+=1;
-  }
+
+  int turns = avg_pos_deg/360
   int avg_pos = turns*wheel_circumfrence;
 
   // Checks error for porp
@@ -94,31 +92,35 @@ int PID_Drive(int desired_value, int desired_turn){
   RMB.spin(forward, motor_power, voltageUnits::volt);
   RMM.spin(forward, motor_power, voltageUnits::volt);
   RMF.spin(forward, motor_power, voltageUnits::volt);
-
-  // Turn
-  int avg_turn = gyro.rotation();
-  int turn_error = avg_turn-desired_turn;
-  turn_intergral+=turn_error;
-  int derivitive = turn_error-turn_prev_error;
-  double turn_motor_power = turn_kp*turn_error+turn_kd*turn_derivitive+turn_ki*turn_intergral;
-  LMB.spin(forward, turn_motor_power, voltageUnits::volt);
-  LMM.spin(forward, turn_motor_power, voltageUnits::volt);
-  LMF.spin(forward, turn_motor_power, voltageUnits::volt);
-
-  RMB.spin(forward, -turn_motor_power, voltageUnits::volt);
-  RMM.spin(forward, -turn_motor_power, voltageUnits::volt);
-  RMF.spin(forward, -turn_motor_power, voltageUnits::volt);
-
-    prev_error=error;
-    tur_prev_error=turn_error;
     task::sleep(20);
   }
-  gyro.reset();
+
   avg_pos=0;
 }
+int PID_turn(int desired_turn){
+  while(enabled_pid && turn_error <=.05){
+    int avg_turn = gyro.rotation();
+    int turn_error = avg_turn-desired_turn;
+    turn_intergral+=turn_error;
+    int derivitive = turn_error-turn_prev_error;
+    double turn_motor_power = turn_kp*turn_error+turn_kd*turn_derivitive+turn_ki*turn_intergral;
+    LMB.spin(forward, turn_motor_power, voltageUnits::volt);
+    LMM.spin(forward, turn_motor_power, voltageUnits::volt);
+    LMF.spin(forward, turn_motor_power, voltageUnits::volt);
 
+    RMB.spin(forward, -turn_motor_power, voltageUnits::volt);
+    RMM.spin(forward, -turn_motor_power, voltageUnits::volt);
+    RMF.spin(forward, -turn_motor_power, voltageUnits::volt);
+
+    turn_prev_error=turn_error;
+    task::sleep(20);
+}
+  gyro.reset();
+}
 void autonomous(void) {
   vex::task PID_IS_GOATED(PID_Drive)
+  vex::task PID_IS_GOATED(PID_turn)
+  
 
 
 
