@@ -66,11 +66,11 @@ void PID_drive(float target_dist){
   float prev_error = 0.0;
   float dist_travled = 0.0;
 // KP,KI,KD
-  float KP = 200.0;
-  float KD = 5.0;
-  float KI = 0.1;
+  float KP = 4.5;
+  float KD = 0.7;
+  float KI = 0.015;
 
-  while (fabs(error)>0.1){
+  while (fabs(error)>0.5){
     float avg_pos_deg = (LMB.position(deg) + LMM.position(deg) + LMF.position(deg) + RMB.position(deg) + RMM.position(deg) + RMF.position(deg))/6;
     // degrees - inches
     dist_travled = (avg_pos_deg/360.0)*circum;
@@ -80,7 +80,11 @@ void PID_drive(float target_dist){
     if (fabs(intergral)>1000){
       intergral=1000*(intergral/fabs(intergral));
     }
-    drive(error*KP+derivitave*KD+intergral*KI, error*KP+derivitave*KD+intergral*KI);
+    float speed = error*KP+derivitave*KD+intergral*KI;
+    if (speed >= fabs(1200)){
+      speed = 1200
+    }
+    drive(speed,speed);
     task::sleep(20);
     prev_error=error;
   }
@@ -93,11 +97,11 @@ void Gyro_turn(float target_angle){
   float t_derivitave = 0.0;
   float t_prev_error = 0.0;
 // KP,KI,KD
-  float TKP = 0.1;
-  float TKD = 0.01;
-  float TKI = 0.001;
+  float TKP = 3.5;
+  float TKD = 0.25;
+  float TKI = 0.005;
   float heading = 0.0;
-  while(fabs(t_error)>0.5){
+  while(fabs(t_error)>1){
     heading = Gyro.rotation(degrees);
     t_error = target_angle-heading;
     t_derivitave =t_error-t_prev_error;
@@ -135,3 +139,4 @@ int main() {
     wait(100, msec);
   }
 }
+
