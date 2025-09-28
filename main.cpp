@@ -34,7 +34,7 @@ void drive(int left_speed, int right_speed){
 // Right motors
   RMB.spin(forward, right_speed, voltageUnits::mV);
   RMM.spin(forward, right_speed, voltageUnits::mV);
-  RMR.spin(forward, right_speed, voltageUnits::mV);
+  RMF.spin(forward, right_speed, voltageUnits::mV);
 }
 
 void drive_brake(){
@@ -45,33 +45,45 @@ void drive_brake(){
   RMM.stop(brake);
   RMF.stop(brake);
 }
-
+void reset_drive(){
+  LMB.resetRotation();
+  LMM.resetRotation();
+  LMF.resetRotation();
+  RMB.resetRotation();
+  RMM.resetRotation();
+  RMF.resetRotation();
+}
 void PID_drive(float target_dist){
 // Errors
-  float error = 0.0;
+  float error = target_dist;
   float intergral = 0.0;
   float derivitave = 0.0;
   float prev_error = 0.0;
   float dist_travled = 0.0;
 // KP,KI,KD
-  float KP = 0.0;
-  float KD = 0.0;
-  float KI = 0.0;
+  float KP = 200.0;
+  float KD = 5.0;
+  float KI = 0.1;
 // Constants
   float wheel_dia = 3.25;
   float pi = 3.14;
   float circum = wheel_dia*pi;
-  while (error<=.1){
+  reset_drive();
+  while (fabs(error)>0.1){
     float avg_pos_deg = (LMB.position(deg) + LMM.position(deg) + LMF.position(deg) + RMB.position(deg) + RMM.position(deg) + RMF.position(deg))/6;
     // degrees - inches
-    float dist_travled = avg_pos_deg*circum;
+    dist_travled = (avg_pos_deg/360.0)*circum;
     error = target_dist-dist_travled;
     derivitave = error - prev_error;
-    intergral = error+prev_error;
-    drive(error*KPp+derivitave*KD+intergral*KI, error*KPp+derivitave*KD+intergral*KI);
+    intergral += error;
+    if (fabs(intergral)>1000){
+      intergral=1000*(intergral/fabs(intergral));
+    }
+    drive(error*KP+derivitave*KD+intergral*KI, error*KP+derivitave*KD+intergral*KI);
     task::sleep(20);
     prev_error=error;
   }
+  drive_brake();
 
 }
 void pre_auton(void) {
