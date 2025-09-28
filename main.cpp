@@ -167,7 +167,7 @@ void autonomous(void) {
   wait(0.25, sec);
   Gyro_turn(172);
   wait(0.25, sec);
-  PID_drive(21.8);
+  PID_drive(40.2);
 }
 void usercontrol(void) {
   while (1) {
