@@ -53,7 +53,12 @@ void reset_drive(){
   RMM.resetRotation();
   RMF.resetRotation();
 }
+// Constants
+float wheel_dia = 3.25;
+float pi = 3.14;
+float circum = wheel_dia*pi;
 void PID_drive(float target_dist){
+  reset_drive();
 // Errors
   float error = target_dist;
   float intergral = 0.0;
@@ -64,11 +69,7 @@ void PID_drive(float target_dist){
   float KP = 200.0;
   float KD = 5.0;
   float KI = 0.1;
-// Constants
-  float wheel_dia = 3.25;
-  float pi = 3.14;
-  float circum = wheel_dia*pi;
-  reset_drive();
+
   while (fabs(error)>0.1){
     float avg_pos_deg = (LMB.position(deg) + LMM.position(deg) + LMF.position(deg) + RMB.position(deg) + RMM.position(deg) + RMF.position(deg))/6;
     // degrees - inches
@@ -84,9 +85,39 @@ void PID_drive(float target_dist){
     prev_error=error;
   }
   drive_brake();
+}
 
+void Gyro_turn(float target_angle){
+  float t_error = target_angle;
+  float t_intergral = 0.0;
+  float t_derivitave = 0.0;
+  float t_prev_error = 0.0;
+// KP,KI,KD
+  float TKP = 0.1;
+  float TKD = 0.01;
+  float TKI = 0.001;
+  float heading = 0.0;
+  while(fabs(t_error)>0.5){
+    heading = Gyro.rotation(degrees);
+    t_error = target_angle-heading;
+    t_derivitave =t_error-t_prev_error;
+    t_intergral+=t_error;
+    if (fabs(t_intergral)>1000){
+      t_intergral=1000*(t_intergral/fabs(t_intergral));
+    }
+    float speed =t_error*TKP+t_derivitave*TKD+t_intergral*TKI;
+    drive(speed,-speed);
+    task::sleep(20);
+    t_prev_error=t_error;
+  }
+  Gyro.resetRotation();
+  drive_brake();
 }
 void pre_auton(void) {
+  Gyro.calibrate();
+  while(Gyro.isCalibrating()) {
+    task::sleep(20); 
+  }
 }
 void autonomous(void) {
 }
