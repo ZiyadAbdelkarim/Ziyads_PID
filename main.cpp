@@ -124,6 +124,8 @@ void pre_auton(void) {
   }
 }
 void autonomous(void) {
+  PID_drive(20);
+  Gyro_turn(90);
 }
 void usercontrol(void) {
   while (1) {
