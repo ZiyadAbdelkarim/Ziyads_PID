@@ -1,8 +1,8 @@
 /*----------------------------------------------------------------------------*/
 /*                                                                            */
 /*    Module:       main.cpp                                                  */
-/*    Author:       theabdelkarims                                            */
-/*    Created:      9/21/2025, 9:39:57 AM                                     */
+/*    Author:       azabd                                                     */
+/*    Created:      9/26/2025, 4:56:39 PM                                     */
 /*    Description:  V5 project                                                */
 /*                                                                            */
 /*----------------------------------------------------------------------------*/
@@ -11,72 +11,84 @@
 
 using namespace vex;
 
+// A global instance of competition
 competition Competition;
 // Left motors
-motor LMB(PORT1, ratio18_1, true);
-motor LMM(PORT2, ratio18_1, true);
-motor LMF(PORT3, ratio18_1, true);
+motor LMB(PORT1, ratio18_1,true);
+motor LMM(PORT2, ratio18_1,true);
+motor LMF(PORT3, ratio18_1,true);
 
 // Right Motors
-motor RMB(PORT4, ratio18_1, true);
-motor RMM(PORT5, ratio18_1, true);
-motor RMF(PORT6, ratio18_1, true);
+motor RMB(PORT4, ratio18_1,false);
+motor RMM(PORT5, ratio18_1,false);
+motor RMF(PORT6, ratio18_1,false);
 
-void drive(){
-  LMB.spin
+// Gyro
+inertial Gyro(PORT7);
+
+void drive(int left_speed, int right_speed){
+  // Left motors
+  LMB.spin(forward, left_speed, voltageUnits::mV);
+  LMM.spin(forward, left_speed, voltageUnits::mV);
+  LMF.spin(forward, left_speed, voltageUnits::mV);
+// Right motors
+  RMB.spin(forward, right_speed, voltageUnits::mV);
+  RMM.spin(forward, right_speed, voltageUnits::mV);
+  RMR.spin(forward, right_speed, voltageUnits::mV);
+}
+
+void drive_brake(){
+  LMB.stop(brake);
+  LMM.stop(brake);
+  LMF.stop(brake);
+  RMB.stop(brake);
+  RMM.stop(brake);
+  RMF.stop(brake);
+}
+
+void PID_drive(float target_dist){
+// Errors
+  float error = 0.0;
+  float intergral = 0.0;
+  float derivitave = 0.0;
+  float prev_error = 0.0;
+  float dist_travled = 0.0;
+// KP,KI,KD
+  float KP = 0.0;
+  float KD = 0.0;
+  float KI = 0.0;
+// Constants
+  float wheel_dia = 3.25;
+  float pi = 3.14;
+  float circum = wheel_dia*pi;
+  while (error<=.1){
+    float avg_pos_deg = (LMB.position(deg) + LMM.position(deg) + LMF.position(deg) + RMB.position(deg) + RMM.position(deg) + RMF.position(deg))/6;
+    // degrees - inches
+    float dist_travled = avg_pos_deg*circum;
+    error = target_dist-dist_travled;
+    derivitave = error - prev_error;
+    intergral = error+prev_error;
+    drive(error*KPp+derivitave*KD+intergral*KI, error*KPp+derivitave*KD+intergral*KI);
+    task::sleep(20);
+    prev_error=error;
+  }
+
 }
 void pre_auton(void) {
-
 }
-
-
 void autonomous(void) {
-  // ..........................................................................
-  // Insert autonomous user code here.
-  // ..........................................................................
 }
-
-/*---------------------------------------------------------------------------*/
-/*                                                                           */
-/*                              User Control Task                            */
-/*                                                                           */
-/*  This task is used to control your robot during the user control phase of */
-/*  a VEX Competition.                                                       */
-/*                                                                           */
-/*  You must modify the code to add your own robot specific commands here.   */
-/*---------------------------------------------------------------------------*/
-
 void usercontrol(void) {
-  // User control code here, inside the loop
   while (1) {
-    // This is the main execution loop for the user control program.
-    // Each time through the loop your program should update motor + servo
-    // values based on feedback from the joysticks.
-
-    // ........................................................................
-    // Insert user code here. This is where you use the joystick values to
-    // update your motors, etc.
-    // ........................................................................
-
-    wait(20, msec); // Sleep the task for a short amount of time to
-                    // prevent wasted resources.
-  }
+    wait(20, msec); 
 }
-
-//
-// Main will set up the competition functions and callbacks.
-//
+}
 int main() {
-  // Set up callbacks for autonomous and driver control periods.
   Competition.autonomous(autonomous);
   Competition.drivercontrol(usercontrol);
-
-  // Run the pre-autonomous function.
   pre_auton();
 
-  // Prevent main from exiting with an infinite loop.
   while (true) {
     wait(100, msec);
   }
 }
-
