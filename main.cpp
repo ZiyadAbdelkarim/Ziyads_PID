@@ -81,8 +81,8 @@ void PID_drive(double target_dist){
       intergral=1000*(intergral/fabs(intergral));
     }
     double speed = error*KP+derivitave*KD+intergral*KI;
-    if (speed >= fabs(1200)){
-      speed = 1200
+    if (speed >= fabs(12000)){
+      speed = 12000;
     }
     drive(speed,speed);
     task::sleep(20);
