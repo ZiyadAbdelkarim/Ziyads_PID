@@ -54,24 +54,24 @@ void reset_drive(){
   RMF.resetRotation();
 }
 // Constants
-float wheel_dia = 3.25;
-float pi = 3.14;
-float circum = wheel_dia*pi;
-void PID_drive(float target_dist){
+double wheel_dia = 3.25;
+double pi = 3.14;
+double circum = wheel_dia*pi;
+void PID_drive(double target_dist){
   reset_drive();
 // Errors
-  float error = target_dist;
-  float intergral = 0.0;
-  float derivitave = 0.0;
-  float prev_error = 0.0;
-  float dist_travled = 0.0;
+  double error = target_dist;
+  double intergral = 0.0;
+  double derivitave = 0.0;
+  double prev_error = 0.0;
+  double dist_travled = 0.0;
 // KP,KI,KD
-  float KP = 4.5;
-  float KD = 0.7;
-  float KI = 0.015;
+  double KP = 4.5;
+  double KD = 0.7;
+  double KI = 0.015;
 
   while (fabs(error)>0.5){
-    float avg_pos_deg = (LMB.position(deg) + LMM.position(deg) + LMF.position(deg) + RMB.position(deg) + RMM.position(deg) + RMF.position(deg))/6;
+    double avg_pos_deg = (LMB.position(deg) + LMM.position(deg) + LMF.position(deg) + RMB.position(deg) + RMM.position(deg) + RMF.position(deg))/6;
     // degrees - inches
     dist_travled = (avg_pos_deg/360.0)*circum;
     error = target_dist-dist_travled;
@@ -80,7 +80,7 @@ void PID_drive(float target_dist){
     if (fabs(intergral)>1000){
       intergral=1000*(intergral/fabs(intergral));
     }
-    float speed = error*KP+derivitave*KD+intergral*KI;
+    double speed = error*KP+derivitave*KD+intergral*KI;
     if (speed >= fabs(1200)){
       speed = 1200
     }
@@ -91,16 +91,16 @@ void PID_drive(float target_dist){
   drive_brake();
 }
 
-void Gyro_turn(float target_angle){
-  float t_error = target_angle;
-  float t_intergral = 0.0;
-  float t_derivitave = 0.0;
-  float t_prev_error = 0.0;
+void Gyro_turn(double target_angle){
+  double t_error = target_angle;
+  double t_intergral = 0.0;
+  double t_derivitave = 0.0;
+  double t_prev_error = 0.0;
 // KP,KI,KD
-  float TKP = 3.5;
-  float TKD = 0.25;
-  float TKI = 0.005;
-  float heading = 0.0;
+  double TKP = 3.5;
+  double TKD = 0.25;
+  double TKI = 0.005;
+  double heading = 0.0;
   while(fabs(t_error)>1){
     heading = Gyro.rotation(degrees);
     t_error = target_angle-heading;
@@ -109,7 +109,7 @@ void Gyro_turn(float target_angle){
     if (fabs(t_intergral)>1000){
       t_intergral=1000*(t_intergral/fabs(t_intergral));
     }
-    float speed =t_error*TKP+t_derivitave*TKD+t_intergral*TKI;
+    double speed =t_error*TKP+t_derivitave*TKD+t_intergral*TKI;
     drive(speed,-speed);
     task::sleep(20);
     t_prev_error=t_error;
@@ -124,8 +124,11 @@ void pre_auton(void) {
   }
 }
 void autonomous(void) {
-  PID_drive(20);
+  Gyro_turn(-18.21);
+  PID_drive(37.2178657);
   Gyro_turn(90);
+  PID_drive(44.1758909);
+
 }
 void usercontrol(void) {
   while (1) {
@@ -141,4 +144,5 @@ int main() {
     wait(100, msec);
   }
 }
+
 
