@@ -22,7 +22,7 @@ motor LMF(PORT3, ratio18_1,true);
 motor RMB(PORT4, ratio18_1,false);
 motor RMM(PORT5, ratio18_1,false);
 motor RMF(PORT6, ratio18_1,false);
-
+digital_out piston(Brain.ThreeWirePort.A);
 // Gyro
 inertial Gyro(PORT7);
 
@@ -114,7 +114,6 @@ void Gyro_turn(double target_angle){
     task::sleep(20);
     t_prev_error=t_error;
   }
-  Gyro.resetRotation();
   drive_brake();
 }
 void pre_auton(void) {
@@ -125,13 +124,54 @@ void pre_auton(void) {
 }
 void autonomous(void) {
   Gyro_turn(-18.21);
+  wait(.5,sec);
   PID_drive(37.2178657);
-  Gyro_turn(90);
+  wait(.5,sec);
+  Gyro_turn(90.00);
+  wait(.5,sec);
   PID_drive(44.1758909);
-
+  wait(0.5, sec);
+  PID_drive(-3.0);
+  wait(0.5, sec);
+  Gyro_turn(0.0);
+  wait(0.5, sec);
+  PID_drive(2.0);
+  wait(0.5, sec);
+  Gyro_turn(90.0);
+  wait(0.5,sec);
+  PID_drive(22.640);
+  wait(1,sec);
+  Gyro_turn(0.0);
+  wait(0.5, sec);
+  PID_drive(2.0);
+  wait(1,sec);
+  PID_drive(-2.0);
+  wait(1,sec);
+  Gyro_turn(90);
+  wait(0.5, sec);
+  PID_drive(-22.640);
+  wait(0.5, sec);
+  Gyro_turn(180.0);
+  wait(0.5, sec);
+  PID_drive(2.0);
+  wait(0.5, sec);
+  Gyro_turn(90);
+  wait(0.5, sec);
+  PID_drive(2.0);
+  wait(0.5, sec);
+  PID_drive(-3.0);
+  wait(0.25, sec);
+  PID_drive(3.0);
+  wait(0.25, sec);
+  PID_drive(-2.0);
+  wait(0.25, sec);
+  Gyro_turn(172);
+  wait(0.25, sec);
+  PID_drive(21.8);
 }
 void usercontrol(void) {
   while (1) {
+
     wait(20, msec); 
 }
 }
@@ -144,5 +184,3 @@ int main() {
     wait(100, msec);
   }
 }
-
-
