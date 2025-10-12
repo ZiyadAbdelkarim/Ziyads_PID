@@ -8,7 +8,7 @@
 /*----------------------------------------------------------------------------*/
 
 #include "vex.h"
-
+#include <cmath>
 using namespace vex;
 
 // A global instance of competition
@@ -81,9 +81,12 @@ void PID_drive(double target_dist){
       intergral=1000*(intergral/fabs(intergral));
     }
     double speed = error*KP+derivitave*KD+intergral*KI;
-    if (speed >= fabs(12000)){
-      speed = 12000;
-    }
+  if (speed > 12000) {
+    speed = 12000;
+  }
+if (speed < -12000) {
+  speed = -12000;
+}
     drive(speed,speed);
     task::sleep(20);
     prev_error=error;
@@ -91,7 +94,10 @@ void PID_drive(double target_dist){
   drive_brake();
 }
 
-void Gyro_turn(double target_angle){
+void Gyro_turn(double target_angle, bool gyro_reset){
+  if (gyro_reset == true){
+    Gyro.resetRotation();
+  }
   double t_error = target_angle;
   double t_intergral = 0.0;
   double t_derivitave = 0.0;
@@ -116,6 +122,19 @@ void Gyro_turn(double target_angle){
   }
   drive_brake();
 }
+double x_pos_original = 79.60;
+double y_pos_original = 14.90;
+void point_drive(double x_pos, double y_pos){
+  double differencex = x_pos-x_pos_original;
+  double differencey = y_pos - y_pos_original;
+  double target_angle_ptp = atan2(differencey, differencex) * (180.0 / pi);
+  double target_dist_ptp = sqrt(pow(differencex, 2)+pow(differencey, 2));    
+  Gyro_turn(target_angle_ptp, false);
+  PID_drive(target_dist_ptp);   
+  x_pos_original=x_pos;
+  y_pos_original=y_pos;
+    
+  }
 void pre_auton(void) {
   Gyro.calibrate();
   while(Gyro.isCalibrating()) {
@@ -123,39 +142,39 @@ void pre_auton(void) {
   }
 }
 void autonomous(void) {
-  Gyro_turn(-18.21);
+  Gyro_turn(-18.21, true);
   wait(.5,sec);
   PID_drive(37.2178657);
   wait(.5,sec);
-  Gyro_turn(90.00);
+  Gyro_turn(90.00, true);
   wait(.5,sec);
   PID_drive(44.1758909);
   wait(0.5, sec);
   PID_drive(-3.0);
   wait(0.5, sec);
-  Gyro_turn(0.0);
+  Gyro_turn(0.0, true);
   wait(0.5, sec);
   PID_drive(2.0);
   wait(0.5, sec);
-  Gyro_turn(90.0);
+  Gyro_turn(90.0, true);
   wait(0.5,sec);
   PID_drive(22.640);
   wait(1,sec);
-  Gyro_turn(0.0);
+  Gyro_turn(0.0, true);
   wait(0.5, sec);
   PID_drive(2.0);
   wait(1,sec);
   PID_drive(-2.0);
   wait(1,sec);
-  Gyro_turn(90);
+  Gyro_turn(90, true);
   wait(0.5, sec);
   PID_drive(-22.640);
   wait(0.5, sec);
-  Gyro_turn(180.0);
+  Gyro_turn(180.0, true);
   wait(0.5, sec);
   PID_drive(2.0);
   wait(0.5, sec);
-  Gyro_turn(90);
+  Gyro_turn(90, true);
   wait(0.5, sec);
   PID_drive(2.0);
   wait(0.5, sec);
@@ -165,7 +184,7 @@ void autonomous(void) {
   wait(0.25, sec);
   PID_drive(-2.0);
   wait(0.25, sec);
-  Gyro_turn(172);
+  Gyro_turn(172, true);
   wait(0.25, sec);
   PID_drive(40.2);
 }
