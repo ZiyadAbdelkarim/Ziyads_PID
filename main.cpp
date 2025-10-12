@@ -67,7 +67,7 @@ void PID_drive(double target_dist){
   double dist_travled = 0.0;
 // KP,KI,KD
   double KP = 4.5;
-  double KD = 0.7;
+  double KD = 0.8;
   double KI = 0.015;
 
   while (fabs(error)>0.5){
@@ -103,11 +103,12 @@ void Gyro_turn(double target_angle, bool gyro_reset){
   double t_derivitave = 0.0;
   double t_prev_error = 0.0;
 // KP,KI,KD
-  double TKP = 3.5;
-  double TKD = 0.25;
+  double TKP = 3.8;
+  double TKD = 0.3;
   double TKI = 0.005;
   double heading = 0.0;
-  while(fabs(t_error)>1){
+  int timer =  0;
+  while(fabs(t_error)>1 && timer <=2000){
     heading = Gyro.rotation(degrees);
     t_error = target_angle-heading;
     t_derivitave =t_error-t_prev_error;
@@ -119,6 +120,7 @@ void Gyro_turn(double target_angle, bool gyro_reset){
     drive(speed,-speed);
     task::sleep(20);
     t_prev_error=t_error;
+    timer+=20;
   }
   drive_brake();
 }
