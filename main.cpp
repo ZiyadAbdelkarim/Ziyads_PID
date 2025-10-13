@@ -6,6 +6,7 @@
 /*    Description:  V5 project                                                */
 /*                                                                            */
 /*----------------------------------------------------------------------------*/
+// EDITED
 
 #include "vex.h"
 #include <cmath>
@@ -28,8 +29,9 @@ inertial Gyro(PORT7);
 
 motor FI(PORT8, ratio18_1, false);
 motor HI(PORT9, ratio18_1, false);
-motor TI(port10, ratio18_1, false);
+motor TI(PORT10, ratio18_1, false);
 distance DistanceSensor(PORT11);
+distance DistanceSensor2(PORT12);
 void drive(int left_speed, int right_speed){
   // Left motors
   LMB.spin(forward, left_speed, voltageUnits::mV);
@@ -73,7 +75,7 @@ void PID_drive(double target_dist){
   double KP = 4.5;
   double KD = 0.8;
   double KI = 0.015;
-
+  int timer = 0;
   while (fabs(error)>0.5 && timer <=2000){
     double avg_pos_deg = (LMB.position(deg) + LMM.position(deg) + LMF.position(deg) + RMB.position(deg) + RMM.position(deg) + RMF.position(deg))/6;
     // degrees - inches
@@ -94,6 +96,7 @@ if (speed < -12000) {
     drive(speed,speed);
     task::sleep(20);
     prev_error=error;
+    timer+=20;
   }
   drive_brake();
 }
@@ -139,7 +142,7 @@ void point_drive(double x_pos, double y_pos, double angle_orentaiton){
   wait(.5, sec);
   PID_drive(target_dist_ptp);   
   wait(.5, sec);
-  Gyro_turn(angle_orentaiton);
+  Gyro_turn(angle_orentaiton, false);
   x_pos_original=x_pos;
   y_pos_original=y_pos;
     
@@ -151,33 +154,33 @@ void store_in_hoard(int time){
 }
 void score_middle(int time){
   while(DistanceSensor.objectDistance(inches)<.75){
-    FI.spin(reverse,12000,voltageUnits::mV):
+    FI.spin(reverse,12000,voltageUnits::mV);
   }
-  else(){
-    FI.spin(reverse,12000,voltageUnits::mV):
-    HI.spin(reverse,12000,voltageUnits::mV):
+  if (DistanceSensor.objectDistance(inches)>.75){
+    FI.spin(reverse,12000,voltageUnits::mV);
+    HI.spin(reverse,12000,voltageUnits::mV);
     wait(time, sec);
   }
 }  
 void score_lower(int time){
   while(DistanceSensor.objectDistance(inches)<.75){
-    FI.spin(forward,12000,voltageUnits::mV):
+    FI.spin(forward,12000,voltageUnits::mV);
 }
-  else(){
-    FI.spin(forward,12000,voltageUnits::mV):
-    HI.spin(forward,12000,voltageUnits::mV):
+  if(DistanceSensor.objectDistance(inches)>.75){
+    FI.spin(forward,12000,voltageUnits::mV);
+    HI.spin(forward,12000,voltageUnits::mV);
     wait(time, sec);
   }
 }
 void score_long_goal(int time){
     while(DistanceSensor.objectDistance(inches)<.75){
-    FI.spin(forward,12000,voltageUnits::mV):
-    TI.spin(forward,12000,voltageUnits::mV):
+    FI.spin(forward,12000,voltageUnits::mV);
+    TI.spin(forward,12000,voltageUnits::mV);
 }
-  else(){
-    FI.spin(forward,12000,voltageUnits::mV):
-    FI.spin(forward,12000,voltageUnits::mV):
-    HI.spin(forward,12000,voltageUnits::mV):
+  if(DistanceSensor.objectDistance(inches)>.75){
+    FI.spin(forward,12000,voltageUnits::mV);
+    TI.spin(forward,12000,voltageUnits::mV);
+    HI.spin(forward,12000,voltageUnits::mV);
     wait(time, sec);
   }
 }
@@ -196,10 +199,10 @@ void go_to_lower_middle_goal(){
  }
  void go_to_match_loader(){
   point_drive(116.96,4.64,180);
-  while(DistanceSensor.objectDistance(inches)<10){
+  while(DistanceSensor2.objectDistance(inches)<10){
     store_in_hoard(3);
   }
-  else{
+  if (DistanceSensor2.objectDistance(inches)>10){
     score_long_goal(7);
   }
 
