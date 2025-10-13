@@ -68,34 +68,38 @@ void PID_drive(double target_dist){
 // Errors
   double error = target_dist;
   double intergral = 0.0;
-  double derivitave = 0.0;
+  double derivative = 0.0;
   double prev_error = 0.0;
   double dist_travled = 0.0;
 // KP,KI,KD
-  double KP = 4.5;
-  double KD = 0.8;
-  double KI = 0.015;
   int timer = 0;
-  while (fabs(error)>0.5 && timer <=2000){
+  while (fabs(error)>0.5 && timer <=5000){
     double avg_pos_deg = (LMB.position(deg) + LMM.position(deg) + LMF.position(deg) + RMB.position(deg) + RMM.position(deg) + RMF.position(deg))/6;
     // degrees - inches
     dist_travled = (avg_pos_deg/360.0)*circum;
     error = target_dist-dist_travled;
-    derivitave = error - prev_error;
+    derivative = error - prev_error;
     intergral += error;
+    double abs_error = fabs(error);
+    double abs_derivative = fabs(derivative);
+    double abs_intergral = fabs(intergral);
+    double KP = 0.90 + 4.60 * (1 - exp(-abs_error / 25));
+    double KD = 0.08 + 0.40 * (1 - exp(-abs_derivative / 20.0));
+    double KI = 0.0005 + 0.015 * (1 - exp(-abs_intergral / 60.0));
     if (fabs(intergral)>1000){
       intergral=1000*(intergral/fabs(intergral));
     }
-    double speed = error*KP+derivitave*KD+intergral*KI;
-  if (speed > 12000) {
-    speed = 12000;
+    double speed = error*KP+derivative*KD+intergral*KI;
+  if (speed > 700) {
+    speed = 700;
   }
-if (speed < -12000) {
-  speed = -12000;
+if (speed < -700) {
+  speed = -700;
 }
     drive(speed,speed);
     task::sleep(20);
     prev_error=error;
+
     timer+=20;
   }
   drive_brake();
@@ -107,23 +111,33 @@ void Gyro_turn(double target_angle, bool gyro_reset){
   }
   double t_error = target_angle;
   double t_intergral = 0.0;
-  double t_derivitave = 0.0;
+  double t_derivative = 0.0;
   double t_prev_error = 0.0;
-// KP,KI,KD
-  double TKP = 3.8;
-  double TKD = 0.3;
-  double TKI = 0.005;
   double heading = 0.0;
   int timer =  0;
-  while(fabs(t_error)>1 && timer <=2000){
+  while(fabs(t_error)>1 && timer <=5000){
     heading = Gyro.rotation(degrees);
     t_error = target_angle-heading;
-    t_derivitave =t_error-t_prev_error;
+    t_derivative =t_error-t_prev_error;
     t_intergral+=t_error;
+    double abs_t_error = fabs(t_error);
+    double abs_t_derivative = fabs(t_derivative);
+    double abs_t_intergral = fabs(t_intergral);
+    // KP,KI,KD
+    double TKP = 0.9 + 4.6 * (1 - exp(-abs_t_error / 25));
+    double TKD = 0.10 + 0.4 * (1 - exp(-abs_t_derivative / 18));
+    double TKI = 0.00001 + 0.008 * (1 - exp(-abs_t_intergral / 60));
     if (fabs(t_intergral)>1000){
       t_intergral=1000*(t_intergral/fabs(t_intergral));
     }
-    double speed =t_error*TKP+t_derivitave*TKD+t_intergral*TKI;
+
+    double speed =t_error*TKP+t_derivative*TKD+t_intergral*TKI;
+    if (speed > 700) {
+    speed = 700;
+  }
+    if (speed < -700) {
+  speed = -700;
+}
     drive(speed,-speed);
     task::sleep(20);
     t_prev_error=t_error;
