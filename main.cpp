@@ -26,6 +26,10 @@ digital_out piston(Brain.ThreeWirePort.A);
 // Gyro
 inertial Gyro(PORT7);
 
+motor FI(PORT8, ratio18_1, false);
+motor HI(PORT9, ratio18_1, false);
+motor TI(port10, ratio18_1, false);
+distance DistanceSensor(PORT11);
 void drive(int left_speed, int right_speed){
   // Left motors
   LMB.spin(forward, left_speed, voltageUnits::mV);
@@ -70,7 +74,7 @@ void PID_drive(double target_dist){
   double KD = 0.8;
   double KI = 0.015;
 
-  while (fabs(error)>0.5){
+  while (fabs(error)>0.5 && timer <=2000){
     double avg_pos_deg = (LMB.position(deg) + LMM.position(deg) + LMF.position(deg) + RMB.position(deg) + RMM.position(deg) + RMF.position(deg))/6;
     // degrees - inches
     dist_travled = (avg_pos_deg/360.0)*circum;
@@ -124,19 +128,90 @@ void Gyro_turn(double target_angle, bool gyro_reset){
   }
   drive_brake();
 }
-double x_pos_original = 79.60;
-double y_pos_original = 14.90;
-void point_drive(double x_pos, double y_pos){
+double x_pos_original = 107.6;
+double y_pos_original = 28.9;
+void point_drive(double x_pos, double y_pos, double angle_orentaiton){
   double differencex = x_pos-x_pos_original;
   double differencey = y_pos - y_pos_original;
   double target_angle_ptp = atan2(differencey, differencex) * (180.0 / pi);
   double target_dist_ptp = sqrt(pow(differencex, 2)+pow(differencey, 2));    
   Gyro_turn(target_angle_ptp, false);
+  wait(.5, sec);
   PID_drive(target_dist_ptp);   
+  wait(.5, sec);
+  Gyro_turn(angle_orentaiton);
   x_pos_original=x_pos;
   y_pos_original=y_pos;
     
   }
+void store_in_hoard(int time){
+  FI.spin(forward, 12000,voltageUnits::mV);
+  HI.spin(forward, 12000,voltageUnits::mV);
+  wait(time, sec);
+}
+void score_middle(int time){
+  while(DistanceSensor.objectDistance(inches)<.75){
+    FI.spin(reverse,12000,voltageUnits::mV):
+  }
+  else(){
+    FI.spin(reverse,12000,voltageUnits::mV):
+    HI.spin(reverse,12000,voltageUnits::mV):
+    wait(time, sec);
+  }
+}  
+void score_lower(int time){
+  while(DistanceSensor.objectDistance(inches)<.75){
+    FI.spin(forward,12000,voltageUnits::mV):
+}
+  else(){
+    FI.spin(forward,12000,voltageUnits::mV):
+    HI.spin(forward,12000,voltageUnits::mV):
+    wait(time, sec);
+  }
+}
+void score_long_goal(int time){
+    while(DistanceSensor.objectDistance(inches)<.75){
+    FI.spin(forward,12000,voltageUnits::mV):
+    TI.spin(forward,12000,voltageUnits::mV):
+}
+  else(){
+    FI.spin(forward,12000,voltageUnits::mV):
+    FI.spin(forward,12000,voltageUnits::mV):
+    HI.spin(forward,12000,voltageUnits::mV):
+    wait(time, sec);
+  }
+}
+
+void go_to_long_goal(){
+  point_drive(48.81, 117.00, 90);
+  score_long_goal(5);
+}
+void go_to_lower_middle_goal(){
+  point_drive(78.19,62.21, 135);
+  score_lower(3);
+}
+ void go_to_upper_middle_goal(){
+  point_drive(78.19,78.21, 315);
+  score_middle(3);
+ }
+ void go_to_match_loader(){
+  point_drive(116.96,4.64,180);
+  while(DistanceSensor.objectDistance(inches)<10){
+    store_in_hoard(3);
+  }
+  else{
+    score_long_goal(7);
+  }
+
+ }
+ void go_pick_up_those_three_blocks(){
+  point_drive(92.14,50.51,135);
+  store_in_hoard(5);
+}
+ void pick_up_blocks_under_the_long_goal(){
+  point_drive(117.95,68.57,90);
+  store_in_hoard(4);
+ }
 void pre_auton(void) {
   Gyro.calibrate();
   while(Gyro.isCalibrating()) {
@@ -144,6 +219,8 @@ void pre_auton(void) {
   }
 }
 void autonomous(void) {
+  bool regularPID = true;
+  if (regularPID){
   Gyro_turn(-18.21, true);
   wait(.5,sec);
   PID_drive(37.2178657);
@@ -189,6 +266,17 @@ void autonomous(void) {
   Gyro_turn(172, true);
   wait(0.25, sec);
   PID_drive(40.2);
+}
+else {
+  go_to_match_loader();
+  go_to_long_goal();
+  go_pick_up_those_three_blocks();
+  go_to_long_goal();
+  pick_up_blocks_under_the_long_goal();
+  go_to_upper_middle_goal();
+  go_to_lower_middle_goal();
+ 
+}
 }
 void usercontrol(void) {
   while (1) {
