@@ -7,7 +7,7 @@
 /*                                                                            */
 /*----------------------------------------------------------------------------*/
 // EDITED
-
+// EDITED
 #include "vex.h"
 #include <cmath>
 using namespace vex;
@@ -33,6 +33,9 @@ motor HI(PORT9, ratio18_1, false);
 motor TI(PORT10, ratio18_1, false);
 distance DistanceSensor(PORT11);
 distance DistanceSensor2(PORT12);
+int timeout = 0;
+int timeout2 = 0;
+
 void drive(int left_speed, int right_speed){
   // Left motors
   LMB.spin(forward, left_speed, voltageUnits::mV);
@@ -154,7 +157,7 @@ void point_drive(double x_pos, double y_pos, double angle_orentaiton){
   double target_angle_ptp = atan2(differencey, differencex) * (180.0 / pi);
   double target_dist_ptp = sqrt(pow(differencex, 2)+pow(differencey, 2));    
   Gyro_turn(target_angle_ptp, false);
-  wait(.5, sec)
+  wait(.5, sec);
   PID_drive(target_dist_ptp);   
   wait(.5, sec);
   Gyro_turn(angle_orentaiton, false);
@@ -168,27 +171,29 @@ void store_in_hoard(int time){
   wait(time, sec);
 }
 void score_middle(int time){
-  while(DistanceSensor.objectDistance(inches)<.75){
+  while(DistanceSensor.objectDistance(inches)<.75 && timeout < 200){
     FI.spin(reverse,12000,voltageUnits::mV);
   }
   if (DistanceSensor.objectDistance(inches)>.75){
     FI.spin(reverse,12000,voltageUnits::mV);
     HI.spin(reverse,12000,voltageUnits::mV);
     wait(time, sec);
+    timeout+=1;
   }
 }  
 void score_lower(int time){
-  while(DistanceSensor.objectDistance(inches)<.75){
+  while(DistanceSensor.objectDistance(inches)<.75 && timeout < 200){
     FI.spin(forward,12000,voltageUnits::mV);
 }
   if(DistanceSensor.objectDistance(inches)>.75){
     FI.spin(forward,12000,voltageUnits::mV);
     HI.spin(forward,12000,voltageUnits::mV);
     wait(time, sec);
+    timeout+=1;
   }
 }
 void score_long_goal(int time){
-    while(DistanceSensor.objectDistance(inches)<.75){
+    while(DistanceSensor.objectDistance(inches)<.75 && timeout < 200){
     FI.spin(forward,12000,voltageUnits::mV);
     TI.spin(forward,12000,voltageUnits::mV);
 }
@@ -197,104 +202,108 @@ void score_long_goal(int time){
     TI.spin(forward,12000,voltageUnits::mV);
     HI.spin(forward,12000,voltageUnits::mV);
     wait(time, sec);
+    timeout+=1;
   }
 }
+
 bool left_red = false;
 bool right_red = false;
 bool left_blue = false;
 bool right_blue = false;
 void Graphics(){
   Brain.Screen.setFont(FontType::PROP40);
+  Brain.Screen.setFillColor(red); 
   Brain.Screen.Screen.drawRectangle(0,0,120,(272/2));
   Brain.Screen.setFillColor(red); 
-  Brain.Screen.Screen.drawRectangle(240,0,120,(272/2));
-  Brain.Screen.setFillColor(red); 
-  Brain.Screen.Screen.drawRectangle(0,(272/2),120,(272/2));
+  Brain.Screen.drawRectangle(240,0,120,(272/2));
   Brain.Screen.setFillColor(blue); 
-  Brain.Screen.Screen.drawRectangle(240,(272/2),120,(272/2));
+  Brain.Screen.drawRectangle(0,(272/2),120,(272/2));
   Brain.Screen.setFillColor(blue); 
-  Brain.Screen.drawLine(240,0,240, 272);
+  Brain.Screen.drawRectangle(240,(272/2),120,(272/2));
+  Brain.Screen.setFillColor(black);
+  Brain.Screen.drawLine(240,0,240, 272); 
   Brain.Screen.setFillColor(black); 
   Brain.Screen.drawLine(0,(272/2),480, (272/2));
-  Brain.Screen.setFillColor(black); 
   Brain.Screen.setPenColor(color::black);
-  Brain.Screen.print(10, (272/4), "Red Left Corner");
-  Brain.Screen.print(250, (272/4), "Red Right Corner");
-  Brain.Screen.print(10, (272/4), "Blue Left Corner");
-  Brain.Screen.print(10, (272/4), "Blue Right Corner");
-  if (Brain.Screen.pressing()){
-    int x = Brain.Screen.xPosition();
-    int y = Brain.Screen.yPosition();
-    if(x < 240 && y < 136){
-      bool left_red = true;
+  Brain.Screen.drawText(10, (272/4), "Red Left Corner");
+  Brain.Screen.drawText(250, (272/4), "Red Right Corner");
+  Brain.Screen.drawText(10, (3*(272/4)), "Blue Left Corner");
+  Brain.Screen.drawText(10, (3*(272/4)), "Blue Right Corner");
+  while (!(left_red || right_red || left_blue || right_blue)){
+    if (Brain.Screen.pressing()){
+      int x = Brain.Screen.xPosition();
+      int y = Brain.Screen.yPosition();
+      if(x < 240 && y < 136){
+      left_red = true;
     }
-   if (x>240 && y<136){
-    bool right_red = true;
+    if (x>240 && y<136){
+      right_red = true;
    }
    if (x<240 && y>136){
-    bool left_blue = true;
+     left_blue = true;
    }
-  if (x>240 && y>136){
-    bool right_blue = true;
+   if (x>240 && y>136){
+      right_blue = true;
   }
   }
 }
+}
 void go_to_long_goal(){
-  if (left_red == true){
+  if (left_red){
     point_drive(48.81, 117.00, 90);
     score_long_goal(5);
   }
-  if (right_red == true){
+  if (right_red){
     point_drive(-48.81, -117.00, 270);
     score_long_goal(5);
   }
-  if (left_blue == true){
+  if (left_blue){
     point_drive(-48.81, -117.00, 270);
     score_long_goal(5);
   }
-  if (right_blue == true){
+  if (right_blue){
     point_drive(48.81, 117.00, 90);
     score_long_goal(5);
   }
 }
 void go_to_lower_middle_goal(){
-  if (left_red == true){
+  if (left_red){
     point_drive(78.19,62.21, 135);
     score_lower(3);
 }
-  if (right_red == true){
+  if (right_red){
     point_drive(78.19,62.21, 135);
     score_lower(3);
 }
-  if (left_blue == true){
+  if (left_blue){
     point_drive(78.19,62.21, 135);
     score_lower(3);
 }
-  if (left_blue == true){
+  if (right_blue){
     point_drive(78.19,62.21, 135);
     score_lower(3);
 }
 }
  void go_to_upper_middle_goal(){
-  if (left_red==true){
+  if (left_red){
     point_drive(78.19,78.21, 315);
     score_middle(3);
   }
-  if (right_red==true){
+  if (right_red){
     point_drive(78.19, 78.21, 315);
     score_middle(3);
   }
-  if (right_blue=true){
+  if (right_blue){
     point_drive(78.19,78.21,315);
     score_middle(3);
   }
-  if (left_blue=true){
+  if (left_blue){
     point_drive(78.19,78.21, 315);
     score_middle(3);
   }
  }
  void go_to_match_loader(){
-  if (left_red == true){
+  if (left_red){
     point_drive(116.96,4.64,180);
     while(DistanceSensor2.objectDistance(inches)<10){
       store_in_hoard(3);
@@ -303,7 +312,7 @@ void go_to_lower_middle_goal(){
     score_long_goal(7);
   }
  }
-  if (right_red == true){
+  if (right_red){
     point_drive(-116.96,-4.64,180);
     while(DistanceSensor2.objectDistance(inches)<10){
       store_in_hoard(3);
@@ -312,7 +321,7 @@ void go_to_lower_middle_goal(){
     score_long_goal(7);
   }
  }
-   if (left_blue == true){
+   if (left_blue){
     point_drive(-116.96,-4.64,180);
     while(DistanceSensor2.objectDistance(inches)<10){
       store_in_hoard(3);
@@ -321,7 +330,7 @@ void go_to_lower_middle_goal(){
     score_long_goal(7);
   }
  }
-  if (right_blue == true){
+  if (right_blue){
     point_drive(116.96,4.64,180);
     while(DistanceSensor2.objectDistance(inches)<10){
       store_in_hoard(3);
@@ -332,46 +341,49 @@ void go_to_lower_middle_goal(){
  }
 }
  void go_pick_up_those_three_blocks(){
-  if (left_red = true){
+  if (left_red){
     point_drive(92.14,50.51,135);
     store_in_hoard(5);
   }
-  if (right_red = true){
+  if (right_red){
     point_drive(-92.14,-50.51,45);
     store_in_hoard(5);
   }
-  if (left_blue_red = true){
+  if (left_blue){
     point_drive(-92.14,-50.51,45);
     store_in_hoard(5);
   }
-  if (right = true){
+  if (right_blue){
     point_drive(92.14,50.51,135);
     store_in_hoard(5);
   }
 }
  void pick_up_blocks_under_the_long_goal(){
-  if (left_red = true){ 
+  if (left_red){ 
     point_drive(117.95,68.57,270);
     store_in_hoard(4);
  }
-   if (right_red = true){ 
+   if (right_red){ 
     point_drive(-117.95,-68.57,270);
     store_in_hoard(4);
  }
-  if (left_blue = true){ 
+  if (left_blue){ 
     point_drive(-117.95,-68.57,270);
     store_in_hoard(4);
  }
-  if (right_blue = true){ 
+  if (right_blue){ 
     point_drive(117.95,68.57,270);
     store_in_hoard(4);
  }
 }
 void pre_auton(void) {
   Gyro.calibrate();
-  while(Gyro.isCalibrating()) {
+  while(Gyro.isCalibrating() && timeout <2000) {
     task::sleep(20); 
+    timeout+=1;
   }
+  timeout=0;
+   Graphics();
 }
 void autonomous(void) {
   bool regularPID = true;
@@ -420,10 +432,9 @@ void autonomous(void) {
   wait(0.25, sec);
   Gyro_turn(172, true);
   wait(0.25, sec);
-  PID_drive(40.2);h
+  PID_drive(40.2);
 }
 else {
-  Graphics();
   go_to_match_loader();
   go_to_long_goal();
   go_pick_up_those_three_blocks();
