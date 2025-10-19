@@ -24,7 +24,8 @@ motor LMF(PORT3, ratio18_1,true);
 motor RMB(PORT4, ratio18_1,false);
 motor RMM(PORT5, ratio18_1,false);
 motor RMF(PORT6, ratio18_1,false);
-digital_out piston(Brain.ThreeWirePort.A);
+digital_out scraper(Brain.ThreeWirePort.A);
+digital_out hood(Brain.ThreeWirePort.B)
 // Gyro
 inertial Gyro(PORT7);
 
@@ -165,6 +166,48 @@ void point_drive(double x_pos, double y_pos, double angle_orentaiton){
   y_pos_original=y_pos;
     
   }
+bool left_red = false;
+bool right_red = false;
+bool left_blue = false;
+bool right_blue = false;
+void GUI_selection(){
+  Brain.Screen.setFont(FontType::PROP40);
+  Brain.Screen.setFillColor(red); 
+  Brain.Screen.Screen.drawRectangle(0,0,120,(272/2));
+  Brain.Screen.setFillColor(red); 
+  Brain.Screen.drawRectangle(240,0,120,(272/2));
+  Brain.Screen.setFillColor(blue); 
+  Brain.Screen.drawRectangle(0,(272/2),120,(272/2));
+  Brain.Screen.setFillColor(blue); 
+  Brain.Screen.drawRectangle(240,(272/2),120,(272/2));
+  Brain.Screen.setFillColor(black);
+  Brain.Screen.drawLine(240,0,240, 272); 
+  Brain.Screen.setFillColor(black); 
+  Brain.Screen.drawLine(0,(272/2),480, (272/2));
+  Brain.Screen.setPenColor(color::white);
+  Brain.Screen.drawText(10, (272/4), "Red Left Corner");
+  Brain.Screen.drawText(250, (272/4), "Red Right Corner");
+  Brain.Screen.drawText(10, (3*(272/4)), "Blue Left Corner");
+  Brain.Screen.drawText(10, (3*(272/4)), "Blue Right Corner");
+  while (!(left_red || right_red || left_blue || right_blue)){
+    if (Brain.Screen.pressing()){
+      int x = Brain.Screen.xPosition();
+      int y = Brain.Screen.yPosition();
+      if(x < 240 && y < 136){
+      left_red = true;
+    }
+    if (x>240 && y<136){
+      right_red = true;
+   }
+   if (x<240 && y>136){
+     left_blue = true;
+   }
+   if (x>240 && y>136){
+      right_blue = true;
+  }
+  }
+}
+}
 void store_in_hoard(int time){
   FI.spin(forward, 12000,voltageUnits::mV);
   HI.spin(forward, 12000,voltageUnits::mV);
@@ -204,49 +247,6 @@ void score_long_goal(int time){
     wait(time, sec);
     timeout+=1;
   }
-}
-
-bool left_red = false;
-bool right_red = false;
-bool left_blue = false;
-bool right_blue = false;
-void Graphics(){
-  Brain.Screen.setFont(FontType::PROP40);
-  Brain.Screen.setFillColor(red); 
-  Brain.Screen.Screen.drawRectangle(0,0,120,(272/2));
-  Brain.Screen.setFillColor(red); 
-  Brain.Screen.drawRectangle(240,0,120,(272/2));
-  Brain.Screen.setFillColor(blue); 
-  Brain.Screen.drawRectangle(0,(272/2),120,(272/2));
-  Brain.Screen.setFillColor(blue); 
-  Brain.Screen.drawRectangle(240,(272/2),120,(272/2));
-  Brain.Screen.setFillColor(black);
-  Brain.Screen.drawLine(240,0,240, 272); 
-  Brain.Screen.setFillColor(black); 
-  Brain.Screen.drawLine(0,(272/2),480, (272/2));
-  Brain.Screen.setPenColor(color::black);
-  Brain.Screen.drawText(10, (272/4), "Red Left Corner");
-  Brain.Screen.drawText(250, (272/4), "Red Right Corner");
-  Brain.Screen.drawText(10, (3*(272/4)), "Blue Left Corner");
-  Brain.Screen.drawText(10, (3*(272/4)), "Blue Right Corner");
-  while (!(left_red || right_red || left_blue || right_blue)){
-    if (Brain.Screen.pressing()){
-      int x = Brain.Screen.xPosition();
-      int y = Brain.Screen.yPosition();
-      if(x < 240 && y < 136){
-      left_red = true;
-    }
-    if (x>240 && y<136){
-      right_red = true;
-   }
-   if (x<240 && y>136){
-     left_blue = true;
-   }
-   if (x>240 && y>136){
-      right_blue = true;
-  }
-  }
-}
 }
 void go_to_long_goal(){
   if (left_red){
@@ -383,44 +383,50 @@ void pre_auton(void) {
     timeout+=1;
   }
   timeout=0;
-   Graphics();
+  GUI_selection();
 }
 void autonomous(void) {
   bool regularPID = true;
   if (regularPID){
-  Gyro_turn(-18.21, true);
+  Gyro_turn(-18.21, false);
   wait(.5,sec);
+  scraper.set(true);
+  hood.set(false);
+  store_in_hoard();
+  wait(2, sec);
   PID_drive(37.2178657);
   wait(.5,sec);
-  Gyro_turn(90.00, true);
+  Gyro_turn(90.00, false);
   wait(.5,sec);
   PID_drive(44.1758909);
   wait(0.5, sec);
+  hood.set(true);
+  scraper.set(false);
   PID_drive(-3.0);
   wait(0.5, sec);
-  Gyro_turn(0.0, true);
+  Gyro_turn(0.0, false);
   wait(0.5, sec);
   PID_drive(2.0);
   wait(0.5, sec);
-  Gyro_turn(90.0, true);
+  Gyro_turn(90.0, false);
   wait(0.5,sec);
   PID_drive(22.640);
   wait(1,sec);
-  Gyro_turn(0.0, true);
+  Gyro_turn(0.0, false);
   wait(0.5, sec);
   PID_drive(2.0);
   wait(1,sec);
   PID_drive(-2.0);
   wait(1,sec);
-  Gyro_turn(90, true);
+  Gyro_turn(90, false);
   wait(0.5, sec);
   PID_drive(-22.640);
   wait(0.5, sec);
-  Gyro_turn(180.0, true);
+  Gyro_turn(180.0, false);
   wait(0.5, sec);
   PID_drive(2.0);
   wait(0.5, sec);
-  Gyro_turn(90, true);
+  Gyro_turn(90, false);
   wait(0.5, sec);
   PID_drive(2.0);
   wait(0.5, sec);
@@ -430,19 +436,34 @@ void autonomous(void) {
   wait(0.25, sec);
   PID_drive(-2.0);
   wait(0.25, sec);
-  Gyro_turn(172, true);
+  Gyro_turn(172, false);
   wait(0.25, sec);
   PID_drive(40.2);
 }
 else {
+  scraper.set(true);
+  hood.set(false);
   go_to_match_loader();
-  go_to_long_goal();
+  scraper.set(false);
+  PID_drive(2);
+  hood.set(true);
+  PID_drive(-2);
   go_pick_up_those_three_blocks();
   go_to_long_goal();
+  PID_drive(-3);
+  Gyro_turn(0, false);
+  wait(0.5, sec);
+  PID_drive(2);
   pick_up_blocks_under_the_long_goal();
   go_to_upper_middle_goal();
+  PID_drive(-2);
   go_to_lower_middle_goal();
- 
+  PID_drive(-2); 
+  hood.set(false)
+  go_to_long_goal();
+  PID_drive(-3);
+  PID_drive(3);
+ //HELLO :)
 }
 }
 void usercontrol(void) {
