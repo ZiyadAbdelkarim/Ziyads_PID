@@ -10,11 +10,27 @@
 // EDITED
 #include "vex.h"
 #include <cmath>
+#include iostream
 using namespace vex;
+#include <iostream>
 
+//int main() {
+    //int arr[] = {1, 2, 0, 3, 4};
+    //int size = sizeof(arr) / sizeof(arr[0]);
+
+    //std::cout << "Values greater than 2: ";
+    //for (int i = 0; i < size; ++i) {
+    //    if (arr[i] > 2) {
+          //  std::cout << arr[i] << " ";
+       // }
+//    }
+
+    //return 0;
+//}
 // A global instance of competition
 competition Competition;
 brain Brain;
+controller Controller1;
 // Left motors
 motor LMB(PORT1, ratio18_1,true);
 motor LMM(PORT2, ratio18_1,true);
@@ -34,7 +50,46 @@ motor HI(PORT9, ratio18_1, false);
 motor TI(PORT10, ratio18_1, false);
 distance DistanceSensor(PORT11);
 distance DistanceSensor2(PORT12);
-int timeout=0;
+void stop_intake(){
+  FI.stop();
+  TI.stop();
+  HI.stop();
+}
+void pit_monitor(){
+  double motor_tourqe_LMB = LMB.torque(torqueUnits::Nm);
+  double motor_tourqe_LMM = LMM.torque(torqueUnits::Nm);
+  double motor_tourqe_LMF = LMF.torque(torqueUnits::Nm);
+
+  double motor_tourqe_RMB = RMB.torque(torqueUnits::Nm);
+  double motor_tourqe_RMM = RMM.torque(torqueUnits::Nm);
+  double motor_tourqe_RMF = RMF.torque(torqueUnits::Nm);
+  std::double motor_tourqe[] = {motor_tourqe_LMB, motor_tourqe_LMF,motor_tourqe_LMM,motor_tourqe_RMB,motor_tourqe_RMF,motor_tourqe_RMM};
+  Brain.Screen.clearScreen();
+  Brain.Screen.setCursor(1, 1);
+  Brain.Screen.setPenColor(color::white);
+  Brain.Screen.print("LMB Torque: %.2f Nm", LMB.torque(torqueUnits::Nm));
+  Brain.Screen.newLine();
+  Brain.Screen.print("LMM Torque: %.2f Nm", LMM.torque(torqueUnits::Nm));
+  Brain.Screen.newLine();
+  Brain.Screen.print("LMF Torque: %.2f Nm", LMF.torque(torqueUnits::Nm));
+  Brain.Screen.newLine();
+  Brain.Screen.print("RMB Torque: %.2f Nm", LMM.torque(torqueUnits::Nm));
+  Brain.Screen.newLine();
+  Brain.Screen.print("RMM Torque: %.2f Nm", RMM.torque(torqueUnits::Nm));
+  Brain.Screen.newLine();
+  Brain.Screen.print("RMB Torque: %.2f Nm", RMB.torque(torqueUnits::Nm));
+  if (motor_tourqe_LMB<2||motor_tourqe_LMM<2 || motor_tourqe_LMF<2 || motor_tourqe_RMB<2 || motor_tourqe_RMM <2|| motor_tourqe_RMF<2){
+      Brain.Screen.setPenColor(color::red);
+  }
+  Brain.Screen.newLine();
+  Brain.Screen.print("LOW TOURQUE MOTORS:")
+  if (motor_tourqe_LMB>2||motor_tourqe_LMM>2 || motor_tourqe_LMF>2 || motor_tourqe_RMB>2 || motor_tourqe_RMM >2|| motor_tourqe_RMF>2){
+      Brain.Screen.setPenColor(color::white);
+      Brain.Screen.print("NONE");
+  }
+  if
+
+}
 void drive(int left_speed, int right_speed){
   // Left motors
   LMB.spin(forward, left_speed, voltageUnits::mV);
@@ -169,7 +224,7 @@ Corner selected_corner = Corner::not_selected;
 void GUI_selection(){
   Brain.Screen.setFont(FontType::PROP40);
   Brain.Screen.setFillColor(red); 
-  Brain.Screen.drawRectangle(0,0,120,(272/2));
+  Brain.Screen.Screen.drawRectangle(0,0,120,(272/2));
   Brain.Screen.setFillColor(red); 
   Brain.Screen.drawRectangle(240,0,120,(272/2));
   Brain.Screen.setFillColor(blue); 
@@ -183,10 +238,9 @@ void GUI_selection(){
   Brain.Screen.setPenColor(color::white);
   Brain.Screen.drawText(10, (272/4), "Red Left Corner");
   Brain.Screen.drawText(250, (272/4), "Red Right Corner");
-  Brain.Screen.drawText(10, (3*272/4), "Blue Left Corner");
+  Brain.Screen.drawText(10, (3*(272/4)), "Blue Left Corner");
   Brain.Screen.drawText(250, (3*(272/4)), "Blue Right Corner");
   while (selected_corner == Corner::not_selected){
-    wait(20, msec);
     if (Brain.Screen.pressing()){
       int x = Brain.Screen.xPosition();
       int y = Brain.Screen.yPosition();
@@ -204,60 +258,71 @@ void GUI_selection(){
   }
   }
 }
-  if(selected_corner != Corner::not_selected){
-    Brain.Screen.clearScreen();
-  }
 }
 void store_in_hoard(int time){
-  FI.spin(forward, 12000,voltageUnits::mV);
-  HI.spin(forward, 12000,voltageUnits::mV);
-  wait(time, msec);
+  int timeout =0;
+  while(DistanceSensor2.objectDistance(inches)<0.75 && DistanceSensor2.objectDistance(inches)> 0 && timeout < 200){
+    FI.spin(forward, 12000,voltageUnits::mV);
+    HI.spin(forward, 12000,voltageUnits::mV);
+    wait(time, msec);
+   timeout+=time;
+}
+  if(DistanceSensor2.objectDistance(inches)<0.75 && DistanceSensor2.objectDistance(inches)> 0 && DistanceSensor.objectDistance(inches)>0.75&& timeout < 200){
+    FI.spin(reverse, 12000,voltageUnits::mV);
+    HI.spin(forward, 12000,voltageUnits::mV);
+    TI.spin(reverse, 12000,voltageUnits::mV);
+    wait(time, msec);
+   timeout+=time;
+  }
+   stop_intake();
 }
 void score_middle(int time){
-  timeout= 0;
-  while(DistanceSensor.objectDistance(inches)<.75 && timeout < 2000){
+  int timeout = 0;
+  while(DistanceSensor.objectDistance(inches)<0.75 && DistanceSensor.objectDistance(inches)> 0 && timeout < 200){
     FI.spin(reverse,12000,voltageUnits::mV);
-    wait(time, msec);
-    timeout+=1;
+   timeout+=time;
   }
-  if (DistanceSensor.objectDistance(inches)>.75){
+  if (DistanceSensor.objectDistance(inches)>0.75){
     FI.spin(reverse,12000,voltageUnits::mV);
     HI.spin(reverse,12000,voltageUnits::mV);
     wait(time, msec);
-    timeout+=1;
+    timeout+=time;
   }
+  stop_intake();
 }  
 void score_lower(int time){
-  timeout= 0;
-  while(DistanceSensor.objectDistance(inches)<.75 && timeout < 2000){
+  int timeout = 0;
+  while(DistanceSensor.objectDistance(inches)<0.75 &&  DistanceSensor.objectDistance(inches)> 0 && timeout < 200){
     FI.spin(forward,12000,voltageUnits::mV);
-    timeout+=1;
+    timeout+=time;
 }
-  if(DistanceSensor.objectDistance(inches)>.75){
-    timeout= 0;
+  if(DistanceSensor.objectDistance(inches)>0.75){
     FI.spin(forward,12000,voltageUnits::mV);
     HI.spin(forward,12000,voltageUnits::mV);
     wait(time, msec);
-    timeout+=1;
+    timeout+=time;
   }
+   stop_intake();
 }
 void score_long_goal(int time){
-    timeout= 0;
-    while(DistanceSensor.objectDistance(inches)<.75 && timeout < 2000){
+  int timeout = 0;
+    while(DistanceSensor.objectDistance(inches)<0.75 && DistanceSensor.objectDistance(inches)> 0 && timeout < 200){
     FI.spin(forward,12000,voltageUnits::mV);
     TI.spin(forward,12000,voltageUnits::mV);
     wait(time, msec);
-    timeout+=1;
+    timeout+=time;
 }
-  if(DistanceSensor.objectDistance(inches)>.75 && timeout < 2000){
+  if(DistanceSensor.objectDistance(inches)>0.75){
     FI.spin(forward,12000,voltageUnits::mV);
     TI.spin(forward,12000,voltageUnits::mV);
     HI.spin(forward,12000,voltageUnits::mV);
     wait(time, msec);
-    timeout+=1;
+    timeout+=time;
   }
+   stop_intake();
 }
 void go_to_long_goal(){
+  int timeout = 0;
   if (selected_corner == Corner::left_red || selected_corner == Corner::right_blue){
     point_drive(48.81, 117.00, 90);
   }
@@ -267,18 +332,21 @@ void go_to_long_goal(){
   score_long_goal(5);
 }
 void go_to_lower_middle_goal(){
+  int timeout = 0;
   if (selected_corner != Corner::not_selected){
     point_drive(78.19,62.21, 135);
 }
   score_lower(3);
 }
  void go_to_upper_middle_goal(){
+  int timeout = 0;
   if (selected_corner != Corner::not_selected){
     point_drive(78.19,78.21, 315);
   }
   score_middle(3);
  }
  void go_to_match_loader(){
+ int timeout = 0;
   if (selected_corner == Corner::left_red || selected_corner == Corner::right_blue){
     point_drive(116.96,4.64,180);
  }
@@ -287,6 +355,7 @@ void go_to_lower_middle_goal(){
  }
 }
  void go_pick_up_those_three_blocks(){
+  int timeout = 0;
   if (selected_corner == Corner::left_red || selected_corner == Corner::right_blue){
     point_drive(92.14,50.51,135);
   }
@@ -296,6 +365,7 @@ void go_to_lower_middle_goal(){
   store_in_hoard(5);
 }
  void pick_up_blocks_under_the_long_goal(){
+  int timeout = 0;
   if (selected_corner == Corner::left_red || selected_corner == Corner::right_blue){ 
     point_drive(117.95,68.57,270);
  }
@@ -305,6 +375,7 @@ void go_to_lower_middle_goal(){
     store_in_hoard(4);
 }
 void pre_auton(void) {
+  int timeout = 0;
   Gyro.calibrate();
   wait(0.1, sec);
   while(Gyro.isCalibrating() && timeout <2000) {
@@ -315,19 +386,19 @@ void pre_auton(void) {
   GUI_selection();
 }
 void autonomous(void) {
-  bool regularPID = false;
+  bool regularPID = true;
   bool match_auton = true;
   if (regularPID){
   Gyro_turn(-18.21, false);
-  wait(.5,sec);
+  wait(0.5,sec);
   scraper.set(true);
   hood.set(false);
   store_in_hoard(10);
   wait(2, sec);
   PID_drive(37.2178657);
-  wait(.5,sec);
+  wait(0.5,sec);
   Gyro_turn(90.00, false);
-  wait(.5,sec);
+  wait(0.5,sec);
   PID_drive(44.1758909);
   wait(0.5, sec);
   hood.set(true);
@@ -396,6 +467,9 @@ else if(!regularPID) {
   PID_drive(3);
  //HELLO :)
   }
+if (match_auton==false){
+
+}
 }
 }
 void usercontrol(void) {
@@ -405,7 +479,10 @@ void usercontrol(void) {
     drive(leftPower * 12, rightPower * 12);
     wait(20, msec); 
   }
+
+    wait(20, msec); 
 }
+
 int main() {
   Competition.autonomous(autonomous);
   Competition.drivercontrol(usercontrol);
