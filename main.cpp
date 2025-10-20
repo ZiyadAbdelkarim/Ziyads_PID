@@ -13,24 +13,11 @@
 #include iostream
 using namespace vex;
 #include <iostream>
-
-//int main() {
-    //int arr[] = {1, 2, 0, 3, 4};
-    //int size = sizeof(arr) / sizeof(arr[0]);
-
-    //std::cout << "Values greater than 2: ";
-    //for (int i = 0; i < size; ++i) {
-    //    if (arr[i] > 2) {
-          //  std::cout << arr[i] << " ";
-       // }
-//    }
-
-    //return 0;
-//}
-// A global instance of competition
+#include <vector>
 competition Competition;
 brain Brain;
 controller Controller1;
+bool usercontrol = false;
 // Left motors
 motor LMB(PORT1, ratio18_1,true);
 motor LMM(PORT2, ratio18_1,true);
@@ -54,41 +41,6 @@ void stop_intake(){
   FI.stop();
   TI.stop();
   HI.stop();
-}
-void pit_monitor(){
-  double motor_tourqe_LMB = LMB.torque(torqueUnits::Nm);
-  double motor_tourqe_LMM = LMM.torque(torqueUnits::Nm);
-  double motor_tourqe_LMF = LMF.torque(torqueUnits::Nm);
-
-  double motor_tourqe_RMB = RMB.torque(torqueUnits::Nm);
-  double motor_tourqe_RMM = RMM.torque(torqueUnits::Nm);
-  double motor_tourqe_RMF = RMF.torque(torqueUnits::Nm);
-  std::double motor_tourqe[] = {motor_tourqe_LMB, motor_tourqe_LMF,motor_tourqe_LMM,motor_tourqe_RMB,motor_tourqe_RMF,motor_tourqe_RMM};
-  Brain.Screen.clearScreen();
-  Brain.Screen.setCursor(1, 1);
-  Brain.Screen.setPenColor(color::white);
-  Brain.Screen.print("LMB Torque: %.2f Nm", LMB.torque(torqueUnits::Nm));
-  Brain.Screen.newLine();
-  Brain.Screen.print("LMM Torque: %.2f Nm", LMM.torque(torqueUnits::Nm));
-  Brain.Screen.newLine();
-  Brain.Screen.print("LMF Torque: %.2f Nm", LMF.torque(torqueUnits::Nm));
-  Brain.Screen.newLine();
-  Brain.Screen.print("RMB Torque: %.2f Nm", LMM.torque(torqueUnits::Nm));
-  Brain.Screen.newLine();
-  Brain.Screen.print("RMM Torque: %.2f Nm", RMM.torque(torqueUnits::Nm));
-  Brain.Screen.newLine();
-  Brain.Screen.print("RMB Torque: %.2f Nm", RMB.torque(torqueUnits::Nm));
-  if (motor_tourqe_LMB<2||motor_tourqe_LMM<2 || motor_tourqe_LMF<2 || motor_tourqe_RMB<2 || motor_tourqe_RMM <2|| motor_tourqe_RMF<2){
-      Brain.Screen.setPenColor(color::red);
-  }
-  Brain.Screen.newLine();
-  Brain.Screen.print("LOW TOURQUE MOTORS:")
-  if (motor_tourqe_LMB>2||motor_tourqe_LMM>2 || motor_tourqe_LMF>2 || motor_tourqe_RMB>2 || motor_tourqe_RMM >2|| motor_tourqe_RMF>2){
-      Brain.Screen.setPenColor(color::white);
-      Brain.Screen.print("NONE");
-  }
-  if
-
 }
 void drive(int left_speed, int right_speed){
   // Left motors
@@ -202,6 +154,143 @@ void Gyro_turn(double target_angle, bool gyro_reset){
     timer+=20;
   }
   drive_brake();
+}
+void checkTorque(){
+  double motor_torque_LMB = LMB.torque(torqueUnits::Nm);
+  double motor_torque_LMM = LMM.torque(torqueUnits::Nm);
+  double motor_torque_LMF = LMF.torque(torqueUnits::Nm);
+
+  double motor_torque_RMB = RMB.torque(torqueUnits::Nm);
+  double motor_torque_RMM = RMM.torque(torqueUnits::Nm);
+  double motor_torque_RMF = RMF.torque(torqueUnits::Nm);
+  double motor_torque[] = {motor_torque_LMB, motor_torque_LMF,motor_torque_LMM,motor_torque_RMB,motor_torque_RMF,motor_torque_RMM};
+  std::vector<int> motorsIncluded;
+  std::string motorNames[] = { "LMB", "LMF", "LMM", "RMB", "RMF", "RMM" };
+  Brain.Screen.clearScreen();
+  Brain.Screen.setCursor(1, 1);
+  Brain.Screen.setPenColor(color::white);
+  Brain.Screen.print("LMB Torque: %.2f Nm", motor_torque_LMB);
+  Brain.Screen.newLine();
+  Brain.Screen.print("LMM Torque: %.2f Nm", motor_torque_LMM);
+  Brain.Screen.newLine();
+  Brain.Screen.print("LMF Torque: %.2f Nm", motor_torque_LMF);
+  Brain.Screen.newLine();
+  Brain.Screen.print("RMB Torque: %.2f Nm", motor_torque_RMB);
+  Brain.Screen.newLine();
+  Brain.Screen.print("RMM Torque: %.2f Nm", motor_torque_RMM);
+  Brain.Screen.newLine();
+  Brain.Screen.print("RMF Torque: %.2f Nm", motor_torque_RMF);
+  Brain.Screen.newLine();
+  Brain.Screen.print("LOW TOURQUE MOTORS:");
+  for (int i = 0; i < 6; ++i) {
+    if (motor_torque[i] < 1.2) {
+      motorsIncluded.push_back(i);
+    }
+  }
+  if (motorsIncluded.empty()){
+      Brain.Screen.setPenColor(color::white);
+      Brain.Screen.print("NONE");
+  }
+  else {
+    Brain.Screen.setPenColor(color::red);
+    for (int idx : motorsIncluded) {
+      Brain.Screen.print(" %s(%.2f)", motorNames[idx].c_str(), motor_torque[idx]);
+    }
+  drive_brake();
+}
+
+}
+void checkSpeed(){
+  double motor_velocity_LMB = LMB.velocity(velocityUnits::rpm);
+  double motor_velocity_LMM = LMM.velocity(velocityUnits::rpm);
+  double motor_velocity_LMF = LMF.velocity(velocityUnits::rpm);
+
+  double motor_velocity_RMB = RMB.velocity(velocityUnits::rpm);
+  double motor_velocity_RMM = RMM.velocity(velocityUnits::rpm);
+  double motor_velocity_RMF = RMF.velocity(velocityUnits::rpm);
+  double motor_speed[] = {motor_velocity_LMB, motor_velocity_LMM,motor_velocity_LMF,motor_velocity_RMB,motor_velocity_RMM,motor_velocity_RMF};
+  std::vector<int> motorsIncluded;
+  std::string motorNames[] = { "LMB", "LMM", "LMF", "RMB", "RMM", "RMF" };
+  Brain.Screen.setCursor(1,30);
+  Brain.Screen.setPenColor(color::white);
+  Brain.Screen.print("LMB velocity: %.2f rpm", motor_velocity_LMB);
+  Brain.Screen.newLine();
+  Brain.Screen.print("LMM velocity: %.2f rpm", motor_velocity_LMM);
+  Brain.Screen.newLine();
+  Brain.Screen.print("LMF velocity: %.2f rpm", motor_velocity_LMF);
+  Brain.Screen.newLine();
+  Brain.Screen.print("RMB velocity: %.2f rpm", motor_velocity_RMB);
+  Brain.Screen.newLine();
+  Brain.Screen.print("RMM velocity: %.2f rpm", motor_velocity_RMM);
+  Brain.Screen.newLine();
+  Brain.Screen.print("RMF velocity: %.2f rpm", motor_velocity_RMF);
+  Brain.Screen.newLine();
+  Brain.Screen.print("LOW VELOCITY MOTORS:");
+  Brain.Screen.newLine();
+  for (int i = 0; i < 6; ++i) {
+    if (motor_speed[i] < 1.2) {
+      motorsIncluded.push_back(i);
+    }
+  }
+  if (motorsIncluded.empty()){
+      Brain.Screen.setPenColor(color::white);
+      Brain.Screen.print("NONE");
+  }
+  else {
+    Brain.Screen.setPenColor(color::red);
+    for (int idx : motorsIncluded) {
+      Brain.Screen.print(" %s(%.2f)", motorNames[idx].c_str(), motor_speed[idx]);
+      Brain.Screen.newLine();
+    }
+  
+  }
+}
+void checkTempature(){
+  double motor_temp_LMB = LMB.temp(temperatureUnits::celsius);
+  double motor_temp_LMM = LMM.temp(temperatureUnits::celsius);
+  double motor_temp_LMF = LMF.temp(temperatureUnits::celsius);
+
+  double motor_temp_RMB = RMB.temp(temperatureUnits::celsius);
+  double motor_temp_RMM = RMM.temp(temperatureUnits::celsius);
+  double motor_temp_RMF = RMF.temp(temperatureUnits::celsius);
+  double motor_temp[] = {motor_temp_LMB, motor_temp_LMM,motor_temp_LMF,motor_temp_RMB,motor_temp_RMM,motor_temp_RMF};
+  std::vector<int> motorsIncluded;
+  std::string motorNames[] = { "LMB", "LMM", "LMF", "RMB", "RMM", "RMF" };
+  Brain.Screen.setCursor(1,65);
+  Brain.Screen.setPenColor(color::white);
+  Brain.Screen.print("LMB temp: %.2f C", motor_temp_LMB);
+  Brain.Screen.newLine();
+  Brain.Screen.print("LMM temp: %.2f C", motor_temp_LMM);
+  Brain.Screen.newLine();
+  Brain.Screen.print("LMF temp: %.2f C", motor_temp_LMF);
+  Brain.Screen.newLine();
+  Brain.Screen.print("RMB temp: %.2f C", motor_temp_RMB);
+  Brain.Screen.newLine();
+  Brain.Screen.print("RMM temp: %.2f C", motor_temp_RMM);
+  Brain.Screen.newLine();
+  Brain.Screen.print("RMF temp: %.2f C", motor_temp_RMF);
+  Brain.Screen.setPenColor(color::orange);
+  Brain.Screen.newLine();
+  Brain.Screen.print("HIGH TEMPERATURE MOTORS:");
+  Brain.Screen.newLine();
+ for (int i = 0; i < 6; ++i) {
+    if (motor_temp[i] >70) {
+      motorsIncluded.push_back(i);
+    }
+  }
+  if (motorsIncluded.empty()){
+      Brain.Screen.setPenColor(color::white);
+      Brain.Screen.print("NONE");
+  }
+  else {
+    Brain.Screen.setPenColor(color::red);
+    for (int idx : motorsIncluded) {
+      Brain.Screen.print(" %s(%.2f)", motorNames[idx].c_str(), motor_temp[idx]);
+      Brain.Screen.newLine();
+    }
+  
+  drive_brake();
+  }
 }
 double x_pos_original = 107.6;
 double y_pos_original = 28.9;
