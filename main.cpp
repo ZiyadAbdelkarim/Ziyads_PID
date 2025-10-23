@@ -73,6 +73,7 @@ void reset_drive(){
 double wheel_dia = 3.25;
 double pi = 3.14;
 double circum = wheel_dia*pi;
+
 void PID_drive(double target_dist){
   reset_drive();
 // Errors
@@ -191,7 +192,7 @@ void checkTorque(){
       Brain.Screen.setPenColor(color::white);
       Brain.Screen.print("NONE");
   }
-  else {
+  else{
     Brain.Screen.setPenColor(color::red);
     for (int idx : motorsIncluded) {
       Brain.Screen.print(" %s(%.2f)", motorNames[idx].c_str(), motor_torque[idx]);
@@ -566,11 +567,43 @@ void usercontrol(void) {
     int leftPower = Controller1.Axis3.position();
     int rightPower = Controller1.Axis2.position();
     drive(leftPower * 12, rightPower * 12);
-    wait(20, msec); 
+    if (Controller1.ButtonR1.pressing()){
+      score_long_goal();
+    }
+    if else (Controller1.ButtonR2.pressing()){
+      store_in_hoard();
+    }
+    if else (Controller1.ButtonL1.pressing())
+    score_middle();  
+  }
+  if else(Controller1.ButtonL2.pressing);
+   score_lower(); 
+}
+  bool Scraper_toggle = true;
+  bool oldScraper_toggle = false;
+  bool hood_toggle = true;
+  bool oldHood_toggle = false;
+  if(Controller1.ButtonA.pressed() && Scraper_toggle == true && oldScraper_toggle==false){
+    scraper.set(true);
+    Scraper_toggle= oldScraper_toggle;
+    Scraper_toggle = false;
+  }
+  if(Controller1.ButtonA.pressed() && Scraper_toggle == false && Scraper_toggle==true){
+    scraper.set(false);
+    Scraper_toggle = true;
+    Scraper_toggle= oldScraper_toggle;
+  }
+  if(Controller1.ButtonB.pressed() && hood_toggle == false && hood_toggle==true){
+    hood.set(true);
+    hood_toggle= false;
+    hood_toggle= oldHood_toggle;
+  }
+  if(Controller1.ButtonB.pressed() && hood_toggle == true && hood_toggle==false){
+    scraper.set(false);
+    hood_toggle = true;
+    hood_toggle= oldHood_toggle;
   }
 
-    wait(20, msec); 
-}
 
 int main() {
   Competition.autonomous(autonomous);
