@@ -10,14 +10,14 @@
 // EDITED
 #include "vex.h"
 #include <cmath>
-#include iostream
 using namespace vex;
 #include <iostream>
 #include <vector>
 competition Competition;
 brain Brain;
 controller Controller1;
-bool usercontrol = false;
+bool regularPID = true;
+bool match_auton = true;
 // Left motors
 motor LMB(PORT1, ratio18_1,true);
 motor LMM(PORT2, ratio18_1,true);
@@ -313,7 +313,7 @@ Corner selected_corner = Corner::not_selected;
 void GUI_selection(){
   Brain.Screen.setFont(FontType::PROP40);
   Brain.Screen.setFillColor(red); 
-  Brain.Screen.Screen.drawRectangle(0,0,120,(272/2));
+  Brain.Screen.drawRectangle(0,0,120,(272/2));
   Brain.Screen.setFillColor(red); 
   Brain.Screen.drawRectangle(240,0,120,(272/2));
   Brain.Screen.setFillColor(blue); 
@@ -466,8 +466,8 @@ void go_to_lower_middle_goal(){
 void pre_auton(void) {
   int timeout = 0;
   Gyro.calibrate();
-  wait(0.1, sec);
-  while(Gyro.isCalibrating() && timeout <2000) {
+  wait(0.1, sec); &
+  while(Gyro.isCalibrating()& timeout <2000) {
     task::sleep(20); 
     timeout+=1;
   }
@@ -475,8 +475,6 @@ void pre_auton(void) {
   GUI_selection();
 }
 void autonomous(void) {
-  bool regularPID = true;
-  bool match_auton = true;
   if (regularPID){
   Gyro_turn(-18.21, false);
   wait(0.5,sec);
@@ -534,13 +532,13 @@ else if(!regularPID) {
   if (match_auton == true){
   scraper.set(true);
   hood.set(false);
-  go_to_match_loader();
+  go_to_match_loader(3);
   scraper.set(false);
   PID_drive(2);
   hood.set(true);
   PID_drive(-2);
-  go_pick_up_those_three_blocks();
-  go_to_long_goal();
+  go_pick_up_those_three_blocks(2);
+  go_to_long_goal(2);
   PID_drive(-3);
   Gyro_turn(0, false);
   wait(0.5, sec);
@@ -557,16 +555,81 @@ else if(!regularPID) {
  //HELLO :)
   }
 if (match_auton==false){
-
+  scraper.set(true);
+  hood.set(false);
+  go_to_match_loader(3);
+  scraper.set(false);
+  PID_drive(2);
+  hood.set(true);
+  PID_drive(-2);
+  go_pick_up_those_three_blocks(2);
+  go_to_long_goal(2);
+  PID_drive(-3);
+  Gyro_turn(0, false);
+  wait(0.5, sec);
+  PID_drive(2);
+  pick_up_blocks_under_the_long_goal();
+  go_to_upper_middle_goal();
+  PID_drive(-2);
+  go_to_lower_middle_goal();
+  PID_drive(-2); 
+  hood.set(false);
+  go_to_long_goal();
+  PID_drive(-3);
+  PID_drive(3);
+  PID_drive(-4);
+  
 }
 }
 }
 void usercontrol(void) {
+  bool toggle_scrapper_new = true;
+  bool toggle_scrapper_old = false;
+  bool toggle_hood_new = true;
+  bool toggle_hood_old = false;
   while (1) {
-    int leftPower = Controller1.Axis3.position();
-    int rightPower = Controller1.Axis2.position();
-    drive(leftPower * 12, rightPower * 12);
-    wait(20, msec); 
+    if (Controller1.buttonR1.pressed()){
+      stop_intake();
+      task::sleep(10);
+      score_long_goal(1000);
+    }
+    if (Controller1.buttonR2.pressed()){
+     task::sleep(10);
+      stop_intake();
+      store_in_hoard(1000);
+    }
+    if (Controller1.buttonL1.pressed()){
+      task::sleep(10);
+      stop_intake();
+      score_middle(1000);
+    }
+    if (Controller1.buttonL2.pressed()){
+     task::sleep(10);
+      stop_intake();
+      score_lower(1000);
+    }
+    if (Controller1.buttonA.pressed()){
+      if (toggle_scrapper_new == true && toggle_scrapper_old == false){
+        task::sleep(10);
+        scraper.set(true);
+        toggle_scrapper_old = toggle_scrapper_new;
+      }
+      if (toggle_scrapper_new == false && toggle_scrapper_old == true){
+        task::sleep(10);
+        scraper.set(false);
+        toggle_scrapper_old = toggle_scrapper_new;        
+      }
+      if (toggle_hood_old == true && toggle_hood_old == false){
+        task::sleep(10);
+        hood.set(true);
+        toggle_hood_new = toggle_hood_old;
+      }
+      if (toggle_hood_old == false && toggle_hood_old==true){
+        task::sleep(10);
+        hood.set(false);
+        toggle_hood_new = toggle_hood_old;        
+      }
+    }
   }
 
     wait(20, msec); 
