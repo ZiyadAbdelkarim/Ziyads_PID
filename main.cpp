@@ -300,9 +300,9 @@ void point_drive(double x_pos, double y_pos, double angle_orentaiton){
   double target_angle_ptp = atan2(differencey, differencex) * (180.0 / pi);
   double target_dist_ptp = sqrt(pow(differencex, 2)+pow(differencey, 2));    
   Gyro_turn(target_angle_ptp, false);
-  wait(0.5, sec);
+  task::sleep(0.5);
   PID_drive(target_dist_ptp);   
-  wait(0.5, sec);
+  task::sleep(0.5);
   Gyro_turn(angle_orentaiton, false);
   x_pos_original=x_pos;
   y_pos_original=y_pos;
@@ -313,17 +313,17 @@ Corner selected_corner = Corner::not_selected;
 void GUI_selection(){
   Brain.Screen.setFont(FontType::PROP40);
   Brain.Screen.setFillColor(red); 
-  Brain.Screen.drawRectangle(0,0,120,(272/2));
+  Brain.Screen.drawRectangle(0,0,120,136);
   Brain.Screen.setFillColor(red); 
-  Brain.Screen.drawRectangle(240,0,120,(272/2));
+  Brain.Screen.drawRectangle(240,0,120, 136);
   Brain.Screen.setFillColor(blue); 
-  Brain.Screen.drawRectangle(0,(272/2),120,(272/2));
+  Brain.Screen.drawRectangle(0,(272/2),120,136);
   Brain.Screen.setFillColor(blue); 
-  Brain.Screen.drawRectangle(240,(272/2),120,(272/2));
+  Brain.Screen.drawRectangle(240,(272/2),120,136);
   Brain.Screen.setFillColor(black);
   Brain.Screen.drawLine(240,0,240, 272); 
   Brain.Screen.setFillColor(black); 
-  Brain.Screen.drawLine(0,(272/2),480, (272/2));
+  Brain.Screen.drawLine(0,(272/2),480,0);
   Brain.Screen.setPenColor(color::white);
   Brain.Screen.drawText(10, (272/4), "Red Left Corner");
   Brain.Screen.drawText(250, (272/4), "Red Right Corner");
@@ -347,76 +347,69 @@ void GUI_selection(){
             selected_corner = Corner::right_blue;
   }
 }
-  else{
+ }
+  }
    Brain.Screen.setCursor(1,1);
    Brain.Screen.print("please press brain when ready");
-   if (Brain.Screen.pressed()){
-     break
-   }
- }
-
-  }
-
-}
 }
 void store_in_hoard(int time){
   int timeout =0;
-  while(DistanceSensor2.objectDistance(inches)<0.75 && DistanceSensor2.objectDistance(inches)> 0 && timeout < 200){
+  while(DistanceSensor2.objectDistance(inches)<0.75 && DistanceSensor2.objectDistance(inches)> 0.0 && timeout < 200){
     FI.spin(forward, 12000,voltageUnits::mV);
     HI.spin(forward, 12000,voltageUnits::mV);
-    wait(time, msec);
+    task::sleep(time);
    timeout+=time;
 }
-  if(DistanceSensor2.objectDistance(inches)<0.75 && DistanceSensor2.objectDistance(inches)> 0 && DistanceSensor.objectDistance(inches)>0.75&& timeout < 200){
+  if(DistanceSensor2.objectDistance(inches)<0.75 && DistanceSensor2.objectDistance(inches)> 0.0 && DistanceSensor.objectDistance(inches)>0.75&& timeout < 200){
     FI.spin(reverse, 12000,voltageUnits::mV);
     HI.spin(forward, 12000,voltageUnits::mV);
     TI.spin(reverse, 12000,voltageUnits::mV);
-    wait(time, msec);
+    task::sleep(time);
    timeout+=time;
   }
    stop_intake();
 }
 void score_middle(int time){
   int timeout = 0;
-  while(DistanceSensor.objectDistance(inches)<0.75 && DistanceSensor.objectDistance(inches)> 0 && timeout < 200){
+  while(DistanceSensor.objectDistance(inches)<0.75 && DistanceSensor.objectDistance(inches)> 0.0 && timeout < 200){
     FI.spin(reverse,12000,voltageUnits::mV);
    timeout+=time;
   }
   if (DistanceSensor.objectDistance(inches)>0.75){
     FI.spin(reverse,12000,voltageUnits::mV);
     HI.spin(reverse,12000,voltageUnits::mV);
-    wait(time, msec);
+    task::sleep(time);
     timeout+=time;
   }
   stop_intake();
 }  
 void score_lower(int time){
   int timeout = 0;
-  while(DistanceSensor.objectDistance(inches)<0.75 &&  DistanceSensor.objectDistance(inches)> 0 && timeout < 200){
+  while(DistanceSensor.objectDistance(inches)<0.75 &&  DistanceSensor.objectDistance(inches)> 0.0 && timeout < 200){
     FI.spin(forward,12000,voltageUnits::mV);
     timeout+=time;
 }
   if(DistanceSensor.objectDistance(inches)>0.75){
     FI.spin(forward,12000,voltageUnits::mV);
     HI.spin(forward,12000,voltageUnits::mV);
-    wait(time, msec);
+    task::sleep(time);
     timeout+=time;
   }
    stop_intake();
 }
 void score_long_goal(int time){
   int timeout = 0;
-    while(DistanceSensor.objectDistance(inches)<0.75 && DistanceSensor.objectDistance(inches)> 0 && timeout < 200){
+    while(DistanceSensor.objectDistance(inches)<0.75 && DistanceSensor.objectDistance(inches)> 0.0 && timeout < 200){
     FI.spin(forward,12000,voltageUnits::mV);
     TI.spin(forward,12000,voltageUnits::mV);
-    wait(time, msec);
+    task::sleep(time);
     timeout+=time;
 }
   if(DistanceSensor.objectDistance(inches)>0.75){
     FI.spin(forward,12000,voltageUnits::mV);
     TI.spin(forward,12000,voltageUnits::mV);
     HI.spin(forward,12000,voltageUnits::mV);
-    wait(time, msec);
+    task::sleep(time);
     timeout+=time;
   }
    stop_intake();
@@ -428,19 +421,19 @@ void go_to_long_goal(){
  if (selected_corner == Corner::right_red || selected_corner == Corner::left_blue){
     point_drive(-48.81, -117.00, 270);
   }
-  score_long_goal(5);
+  score_long_goal(5000);
 }
 void go_to_lower_middle_goal(){
   if (selected_corner != Corner::not_selected){
     point_drive(78.19,62.21, 135);
 }
-  score_lower(3);
+  score_lower(3000);
 }
  void go_to_upper_middle_goal(){
   if (selected_corner != Corner::not_selected){
     point_drive(78.19,78.21, 315);
   }
-  score_middle(3);
+  score_middle(3000);
  }
  void go_to_match_loader(){
   if (selected_corner == Corner::left_red || selected_corner == Corner::right_blue){
@@ -457,7 +450,7 @@ void go_to_lower_middle_goal(){
   else if (selected_corner == Corner::left_blue || selected_corner == Corner::right_red){
     point_drive(-92.14,-50.51,45);
   }
-  store_in_hoard(5);
+  store_in_hoard(5000);
 }
  void pick_up_blocks_under_the_long_goal(){
   if (selected_corner == Corner::left_red || selected_corner == Corner::right_blue){ 
@@ -466,45 +459,45 @@ void go_to_lower_middle_goal(){
    else if (selected_corner == Corner::right_red || selected_corner == Corner::left_blue){ 
     point_drive(-117.95,-68.57,270);
  }
-    store_in_hoard(4);
+    store_in_hoard(4000);
 }
 void go_to_long_goal2(){
   if (selected_corner == Corner::left_red || selected_corner == Corner::right_blue){
     point_drive(23,48, 90);
   }
-  score_long_goal(5);
+  score_long_goal(5000);
 }
 void go_to_match_loader2(){
   if (selected_corner == Corner::left_red || selected_corner == Corner::right_blue){
     point_drive(23,4.5, 90);
   }
-  store_in_hoard(5)
+  store_in_hoard(5000);
 }
 void go_pick_up_those_three_blocks2(){
   if (selected_corner == Corner::left_red || selected_corner == Corner::right_blue){
     point_drive(47,50, 45);
   }
-  store_in_hoard(3);
+  store_in_hoard(3000);
 }
  void pick_up_blocks_under_the_long_goal2(){
   if (selected_corner == Corner::left_red || selected_corner == Corner::right_blue){ 
     point_drive(24,68.57,270);
  }
-    store_in_hoard(4);
+    store_in_hoard(4000);
 }
  void park(){
   point_drive(62,14.86,270);
-  store_in_hoard(4);
+  store_in_hoard(4000);
  }
  void park2(){
   point_drive(62, 141,90);
-  store_in_hoard(2);
+  store_in_hoard(2000);
  }
  void pick_up_side_blocks(){
   point_drive(0.9, 26, 0);
   store_in_hoard(3);
   point_drive(139, 26,0);
-  store_in_hoard(4);
+  store_in_hoard(4000);
  }
  void pick_up_block_continusly(){
   store_in_hoard(100000);
@@ -518,10 +511,10 @@ void go_pick_up_those_three_blocks2(){
 void pre_auton(void) {
   int timeout = 0;
   Gyro.calibrate();
-  wait(0.1, sec); &
-  while(Gyro.isCalibrating()& timeout <2000) {
+  task::sleep(0.1); 
+  while(Gyro.isCalibrating() && timeout <2000) {
     task::sleep(20); 
-    timeout+=1;
+    timeout+=20;
   }
   timeout=0;
   GUI_selection();
@@ -529,71 +522,71 @@ void pre_auton(void) {
 void autonomous(void) {
   if (regularPID){
   Gyro_turn(-18.21, false);
-  wait(0.5,sec);
+  task::sleep(0.5);
   scraper.set(true);
   hood.set(false);
   store_in_hoard(10);
-  wait(2, sec);
+  task::sleep(2);
   PID_drive(37.2178657);
-  wait(0.5,sec);
+  task::sleep(0.5);
   Gyro_turn(90.00, false);
-  wait(0.5,sec);
+  task::sleep(0.5);
   PID_drive(44.1758909);
-  wait(0.5, sec);
+  task::sleep(0.5);
   hood.set(true);
   scraper.set(false);
   PID_drive(-3.0);
-  wait(0.5, sec);
+  task::sleep(0.5);
   Gyro_turn(0.0, false);
-  wait(0.5, sec);
+  task::sleep(0.5);
   PID_drive(2.0);
-  wait(0.5, sec);
+  task::sleep(0.5);
   Gyro_turn(90.0, false);
-  wait(0.5,sec);
+  task::sleep(0.5);
   PID_drive(22.640);
-  wait(1,sec);
+  task::sleep(1);
   Gyro_turn(0.0, false);
-  wait(0.5, sec);
+  task::sleep(0.5);
   PID_drive(2.0);
-  wait(1,sec);
+  task::sleep(1);
   PID_drive(-2.0);
-  wait(1,sec);
+  task::sleep(1);
   Gyro_turn(90, false);
-  wait(0.5, sec);
+  task::sleep(0.5);
   PID_drive(-22.640);
-  wait(0.5, sec);
+  task::sleep(0.5);
   Gyro_turn(180.0, false);
-  wait(0.5, sec);
+  task::sleep(0.5);
   PID_drive(2.0);
-  wait(0.5, sec);
+  task::sleep(0.5);
   Gyro_turn(90, false);
-  wait(0.5, sec);
+  task::sleep(0.5);
   PID_drive(2.0);
-  wait(0.5, sec);
+  task::sleep(0.5);
   PID_drive(-3.0);
-  wait(0.25, sec);
+  task::sleep(0.25);
   PID_drive(3.0);
-  wait(0.25, sec);
+  task::sleep(0.25);
   PID_drive(-2.0);
-  wait(0.25, sec);
+  task::sleep(0.25);
   Gyro_turn(172, false);
-  wait(0.25, sec);
+  task::sleep(0.25);
   PID_drive(40.2);
 } 
 else if(!regularPID) {
   if (match_auton == true){
   scraper.set(true);
   hood.set(false);
-  go_to_match_loader(3);
+  go_to_match_loader();
   scraper.set(false);
   PID_drive(2);
   hood.set(true);
   PID_drive(-2);
-  go_pick_up_those_three_blocks(2);
-  go_to_long_goal(2);
+  go_pick_up_those_three_blocks();
+  go_to_long_goal();
   PID_drive(-3);
   Gyro_turn(0, false);
-  wait(0.5, sec);
+  task::sleep(0.5);
   PID_drive(2);
   pick_up_blocks_under_the_long_goal();
   go_to_upper_middle_goal();
@@ -609,7 +602,7 @@ else if(!regularPID) {
 if (match_auton==false){
   scraper.set(true);
   hood.set(false);
-  go_to_match_loader(3);
+  go_to_match_loader();
   scraper.set(false);
   PID_drive(2);
   hood.set(true);
@@ -618,7 +611,7 @@ if (match_auton==false){
   go_to_long_goal();
   PID_drive(-3);
   Gyro_turn(0, false);
-  wait(0.5, sec);
+  task::sleep(0.5);
   PID_drive(2);
   pick_up_blocks_under_the_long_goal();
   go_to_upper_middle_goal();
@@ -632,7 +625,7 @@ if (match_auton==false){
   PID_drive(-1);
   scraper.set(true);
   hood.set(false);
-  go_to_match_loader2(3);
+  go_to_match_loader2();
   scraper.set(false);
   PID_drive(2);
   hood.set(true);
@@ -641,21 +634,21 @@ if (match_auton==false){
   go_to_long_goal2();
   PID_drive(-3);
   Gyro_turn(0, false);
-  wait(0.5, sec);
+  task::sleep(0.5);
   PID_drive(2);
   pick_up_blocks_under_the_long_goal2();
-  go_to_upper_middle_goal2();
+  go_to_upper_middle_goal();
   PID_drive(-2);
-  go_to_lower_middle_goal2();
+  go_to_lower_middle_goal();
   PID_drive(-2); 
   hood.set(false);
   go_to_long_goal2();
   PID_drive(-3);
   PID_drive(3);
   park();
-  go_to_long_goal();
+  go_to_long_goal2();
   pick_up_side_blocks();
-  go_to_long_goal();
+  go_to_long_goal2();
   park();
   PID_drive(-5);
   park2();
@@ -674,51 +667,50 @@ void usercontrol(void) {
   bool toggle_hood_new = true;
   bool toggle_hood_old = false;
   while (1) {
-    if (Controller1.buttonR1.pressed()){
+    if (Controller1.buttonR1.pressing()){
       stop_intake();
       task::sleep(10);
-      score_long_goal(1000);
+      score_long_goal(1000000);
     }
-    if (Controller1.buttonR2.pressed()){
+    if (Controller1.buttonR2.pressing()){
      task::sleep(10);
       stop_intake();
-      store_in_hoard(1000);
+      store_in_hoard(10000000);
     }
-    if (Controller1.buttonL1.pressed()){
+    if (Controller1.buttonL1.pressing()){
       task::sleep(10);
       stop_intake();
-      score_middle(1000);
+      score_middle(10000000);
     }
-    if (Controller1.buttonL2.pressed()){
+    if (Controller1.buttonL2.pressing()){
      task::sleep(10);
       stop_intake();
-      score_lower(1000);
+      score_lower(1000000000);
     }
-    if (Controller1.buttonA.pressed()){
+    if (Controller1.buttonA.pressing()){
       if (toggle_scrapper_new == true && toggle_scrapper_old == false){
         task::sleep(10);
         scraper.set(true);
-        toggle_scrapper_old = toggle_scrapper_new;
+        toggle_scrapper_old = !toggle_scrapper_old;
       }
       if (toggle_scrapper_new == false && toggle_scrapper_old == true){
         task::sleep(10);
         scraper.set(false);
-        toggle_scrapper_old = toggle_scrapper_new;        
+        toggle_scrapper_old = !toggle_scrapper_old;        
       }
-      if (toggle_hood_old == true && toggle_hood_old == false){
+      if (toggle_hood_old == false && toggle_hood_new == true){
         task::sleep(10);
         hood.set(true);
-        toggle_hood_new = toggle_hood_old;
+        toggle_hood_new = !toggle_hood_new;
       }
-      if (toggle_hood_old == false && toggle_hood_old==true){
+      if (toggle_hood_new == false && toggle_hood_old==true){
         task::sleep(10);
         hood.set(false);
-        toggle_hood_new = toggle_hood_old;        
+        toggle_hood_old= !toggle_hood_old;        
       }
     }
+      task::sleep(20); 
   }
-
-    wait(20, msec); 
 }
 
 int main() {
@@ -727,6 +719,6 @@ int main() {
   pre_auton();
 
   while (true) {
-    wait(100, msec);
+    task::sleep(100);
   }
 }
