@@ -329,23 +329,34 @@ void GUI_selection(){
   Brain.Screen.drawText(250, (272/4), "Red Right Corner");
   Brain.Screen.drawText(10, (3*(272/4)), "Blue Left Corner");
   Brain.Screen.drawText(250, (3*(272/4)), "Blue Right Corner");
-  while (selected_corner == Corner::not_selected){
-    if (Brain.Screen.pressing()){
-      int x = Brain.Screen.xPosition();
-      int y = Brain.Screen.yPosition();
-      if(x < 240 && y < 136){
-      selected_corner = Corner::left_red;
-    }
-    if (x>240 && y<136){
-      selected_corner = Corner::right_red;
+  if (match_auton == true){
+    while (selected_corner == Corner::not_selected){
+      if (Brain.Screen.pressing()){
+        int x = Brain.Screen.xPosition();
+        int y = Brain.Screen.yPosition();
+        if(x < 240 && y < 136){
+        selected_corner = Corner::left_red;
+       }
+        if (x>240 && y<136){
+          selected_corner = Corner::right_red;
    }
-   if (x<240 && y>136){
-     selected_corner = Corner::left_blue;
+        if (x<240 && y>136){
+          selected_corner = Corner::left_blue;
    }
-   if (x>240 && y>136){
-      selected_corner = Corner::right_blue;
+        if (x>240 && y>136){
+            selected_corner = Corner::right_blue;
   }
+}
+  else{
+   Brain.Screen.setCursor(1,1);
+   Brain.Screen.print("please press brain when ready");
+   if (Brain.Screen.pressed()){
+     break
+   }
+ }
+
   }
+
 }
 }
 void store_in_hoard(int time){
@@ -463,6 +474,38 @@ void go_to_lower_middle_goal(){
  }
     store_in_hoard(4);
 }
+void go_to_long_goal2(){
+  int timeout = 0;
+  if (selected_corner == Corner::left_red || selected_corner == Corner::right_blue){
+    point_drive(23,48, 90);
+  }
+  score_long_goal(5);
+}
+void go_to_match_loader2(){
+  int timeout = 0;
+  if (selected_corner == Corner::left_red || selected_corner == Corner::right_blue){
+    point_drive(23,4.5, 90);
+  }
+  store_in_hoard(5)
+}
+void go_pick_up_those_three_blocks2(){
+  int timeout = 0;
+  if (selected_corner == Corner::left_red || selected_corner == Corner::right_blue){
+    point_drive(47,50, 45);
+  }
+  store_in_hoard(3);
+}
+ void pick_up_blocks_under_the_long_goal2(){
+  int timeout = 0;
+  if (selected_corner == Corner::left_red || selected_corner == Corner::right_blue){ 
+    point_drive(24,68.57,270);
+ }
+    store_in_hoard(4);
+}
+
+
+
+
 void pre_auton(void) {
   int timeout = 0;
   Gyro.calibrate();
@@ -562,8 +605,8 @@ if (match_auton==false){
   PID_drive(2);
   hood.set(true);
   PID_drive(-2);
-  go_pick_up_those_three_blocks(2);
-  go_to_long_goal(2);
+  go_pick_up_those_three_blocks();
+  go_to_long_goal();
   PID_drive(-3);
   Gyro_turn(0, false);
   wait(0.5, sec);
@@ -577,7 +620,29 @@ if (match_auton==false){
   go_to_long_goal();
   PID_drive(-3);
   PID_drive(3);
-  PID_drive(-4);
+  PID_drive(-1);
+  scraper.set(true);
+  hood.set(false);
+  go_to_match_loader2(3);
+  scraper.set(false);
+  PID_drive(2);
+  hood.set(true);
+  PID_drive(-2);
+  go_pick_up_those_three_blocks2();
+  go_to_long_goal2();
+  PID_drive(-3);
+  Gyro_turn(0, false);
+  wait(0.5, sec);
+  PID_drive(2);
+  pick_up_blocks_under_the_long_goal2();
+  go_to_upper_middle_goal2();
+  PID_drive(-2);
+  go_to_lower_middle_goal2();
+  PID_drive(-2); 
+  hood.set(false);
+  go_to_long_goal2();
+  PID_drive(-3);
+  PID_drive(3);
   
 }
 }
