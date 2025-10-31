@@ -16,8 +16,8 @@ using namespace vex;
 competition Competition;
 brain Brain;
 controller Controller1;
-bool regularPID = true;
-bool match_auton = true;
+bool regularPID = false;
+bool match_auton = false;
 // Left motors
 motor LMB(PORT1, ratio18_1,true);
 motor LMM(PORT2, ratio18_1,true);
@@ -422,7 +422,6 @@ void score_long_goal(int time){
    stop_intake();
 }
 void go_to_long_goal(){
-  int timeout = 0;
   if (selected_corner == Corner::left_red || selected_corner == Corner::right_blue){
     point_drive(48.81, 117.00, 90);
   }
@@ -432,21 +431,18 @@ void go_to_long_goal(){
   score_long_goal(5);
 }
 void go_to_lower_middle_goal(){
-  int timeout = 0;
   if (selected_corner != Corner::not_selected){
     point_drive(78.19,62.21, 135);
 }
   score_lower(3);
 }
  void go_to_upper_middle_goal(){
-  int timeout = 0;
   if (selected_corner != Corner::not_selected){
     point_drive(78.19,78.21, 315);
   }
   score_middle(3);
  }
  void go_to_match_loader(){
- int timeout = 0;
   if (selected_corner == Corner::left_red || selected_corner == Corner::right_blue){
     point_drive(116.96,4.64,180);
  }
@@ -455,7 +451,6 @@ void go_to_lower_middle_goal(){
  }
 }
  void go_pick_up_those_three_blocks(){
-  int timeout = 0;
   if (selected_corner == Corner::left_red || selected_corner == Corner::right_blue){
     point_drive(92.14,50.51,135);
   }
@@ -465,7 +460,6 @@ void go_to_lower_middle_goal(){
   store_in_hoard(5);
 }
  void pick_up_blocks_under_the_long_goal(){
-  int timeout = 0;
   if (selected_corner == Corner::left_red || selected_corner == Corner::right_blue){ 
     point_drive(117.95,68.57,270);
  }
@@ -475,28 +469,24 @@ void go_to_lower_middle_goal(){
     store_in_hoard(4);
 }
 void go_to_long_goal2(){
-  int timeout = 0;
   if (selected_corner == Corner::left_red || selected_corner == Corner::right_blue){
     point_drive(23,48, 90);
   }
   score_long_goal(5);
 }
 void go_to_match_loader2(){
-  int timeout = 0;
   if (selected_corner == Corner::left_red || selected_corner == Corner::right_blue){
     point_drive(23,4.5, 90);
   }
   store_in_hoard(5)
 }
 void go_pick_up_those_three_blocks2(){
-  int timeout = 0;
   if (selected_corner == Corner::left_red || selected_corner == Corner::right_blue){
     point_drive(47,50, 45);
   }
   store_in_hoard(3);
 }
  void pick_up_blocks_under_the_long_goal2(){
-  int timeout = 0;
   if (selected_corner == Corner::left_red || selected_corner == Corner::right_blue){ 
     point_drive(24,68.57,270);
  }
@@ -505,6 +495,10 @@ void go_pick_up_those_three_blocks2(){
  void park(){
   point_drive(62,14.86,180);
   store_in_hoard(4);
+ }
+ void park2(){
+  point_drive(62, 141);
+  store_in_hoard(2);
  }
  void pick_up_side_blocks(){
   point_drive(0.9, 26);
@@ -655,6 +649,12 @@ if (match_auton==false){
   go_to_long_goal();
   pick_up_side_blocks();
   go_to_long_goal();
+  park();
+  store_in_hoard(20);
+  go_to_long_goal2();
+  PID_drive(-5);
+  park2();
+  go_to_long_goal2();
 }
 }
 }
