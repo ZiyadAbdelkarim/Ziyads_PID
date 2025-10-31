@@ -1,4 +1,4 @@
-/*----------------------------------------------------------------------------*/
+*----------------------------------------------------------------------------*/
 /*                                                                            */
 /*    Module:       main.cpp                                                  */
 /*    Author:       azabd                                                     */
@@ -19,22 +19,22 @@ controller Controller1;
 bool regularPID = false;
 bool match_auton = false;
 // Left motors
-motor LMB(PORT1, ratio18_1,true);
-motor LMM(PORT2, ratio18_1,true);
-motor LMF(PORT3, ratio18_1,true);
+motor LMB(PORT1, gearSetting::ratio18_1,true);
+motor LMM(PORT2, gearSetting::ratio18_1,true);
+motor LMF(PORT3, gearSetting::ratio18_1,true);
 
 // Right Motors
-motor RMB(PORT4, ratio18_1,false);
-motor RMM(PORT5, ratio18_1,false);
-motor RMF(PORT6, ratio18_1,false);
+motor RMB(PORT4, gearSetting::ratio18_1,false);
+motor RMM(PORT5, gearSetting::ratio18_1,false);
+motor RMF(PORT6, gearSetting::ratio18_1,false);
 digital_out scraper(Brain.ThreeWirePort.A);
 digital_out hood(Brain.ThreeWirePort.B);
 // Gyro
 inertial Gyro(PORT7);
 
-motor FI(PORT8, ratio18_1, false);
-motor HI(PORT9, ratio18_1, false);
-motor TI(PORT10, ratio18_1, false);
+motor FI(PORT8, gearSetting::ratio18_1, false);
+motor HI(PORT9, gearSetting::ratio18_1, false);
+motor TI(PORT10, gearSetting::ratio18_1, false);
 distance DistanceSensor(PORT11);
 distance DistanceSensor2(PORT12);
 void stop_intake(){
@@ -321,7 +321,7 @@ void GUI_selection(){
   Brain.Screen.setFillColor(blue); 
   Brain.Screen.drawRectangle(240,(272/2),120,136);
   Brain.Screen.setFillColor(black);
-  Brain.Screen.drawLine(240,0,240, 272); 
+  Brain.Screen.drawLine(240,(272/2),0, (272/2)); 
   Brain.Screen.setFillColor(black); 
   Brain.Screen.drawLine(0,(272/2),480,0);
   Brain.Screen.setPenColor(color::white);
@@ -513,8 +513,8 @@ void pre_auton(void) {
   Gyro.calibrate();
   task::sleep(0.1); 
   while(Gyro.isCalibrating() && timeout <2000) {
-    task::sleep(20); 
-    timeout+=20;
+    task::sleep(500); 
+    timeout+=500;
   }
   timeout=0;
   GUI_selection();
@@ -522,55 +522,55 @@ void pre_auton(void) {
 void autonomous(void) {
   if (regularPID){
   Gyro_turn(-18.21, false);
-  task::sleep(0.5);
+  task::sleep(100);
   scraper.set(true);
   hood.set(false);
-  store_in_hoard(10);
+  store_in_hoard(100);
   task::sleep(2);
   PID_drive(37.2178657);
-  task::sleep(0.5);
+  task::sleep(100);
   Gyro_turn(90.00, false);
-  task::sleep(0.5);
+  task::sleep(100);
   PID_drive(44.1758909);
-  task::sleep(0.5);
+  task::sleep(100);
   hood.set(true);
   scraper.set(false);
   PID_drive(-3.0);
-  task::sleep(0.5);
+  task::sleep(100);
   Gyro_turn(0.0, false);
-  task::sleep(0.5);
+  task::sleep(100);
   PID_drive(2.0);
-  task::sleep(0.5);
+  task::sleep(100);
   Gyro_turn(90.0, false);
-  task::sleep(0.5);
+  task::sleep(100);
   PID_drive(22.640);
-  task::sleep(1);
+  task::sleep(100);
   Gyro_turn(0.0, false);
-  task::sleep(0.5);
+  task::sleep(100);
   PID_drive(2.0);
-  task::sleep(1);
+  task::sleep(100);
   PID_drive(-2.0);
-  task::sleep(1);
+  task::sleep(100);
   Gyro_turn(90, false);
-  task::sleep(0.5);
+  task::sleep(100);
   PID_drive(-22.640);
-  task::sleep(0.5);
+  task::sleep(100);
   Gyro_turn(180.0, false);
-  task::sleep(0.5);
+  task::sleep(100);
   PID_drive(2.0);
-  task::sleep(0.5);
+  task::sleep(100);
   Gyro_turn(90, false);
-  task::sleep(0.5);
+  task::sleep(100);
   PID_drive(2.0);
-  task::sleep(0.5);
+  task::sleep(100);
   PID_drive(-3.0);
-  task::sleep(0.25);
+  task::sleep(100);
   PID_drive(3.0);
-  task::sleep(0.25);
+  task::sleep(100);
   PID_drive(-2.0);
-  task::sleep(0.25);
+  task::sleep(100);
   Gyro_turn(172, false);
-  task::sleep(0.25);
+  task::sleep(100);
   PID_drive(40.2);
 } 
 else if(!regularPID) {
@@ -698,6 +698,7 @@ void usercontrol(void) {
         scraper.set(false);
         toggle_scrapper_old = !toggle_scrapper_old;        
       }
+    if (Controller1.buttonB.pressing())
       if (toggle_hood_old == false && toggle_hood_new == true){
         task::sleep(10);
         hood.set(true);
