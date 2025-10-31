@@ -493,20 +493,27 @@ void go_pick_up_those_three_blocks2(){
     store_in_hoard(4);
 }
  void park(){
-  point_drive(62,14.86,180);
+  point_drive(62,14.86,270);
   store_in_hoard(4);
  }
  void park2(){
-  point_drive(62, 141);
+  point_drive(62, 141,90);
   store_in_hoard(2);
  }
  void pick_up_side_blocks(){
-  point_drive(0.9, 26);
+  point_drive(0.9, 26, 0);
   store_in_hoard(3);
-  point_drive(139, 26);
+  point_drive(139, 26,0);
   store_in_hoard(4);
  }
-
+ void pick_up_block_continusly(){
+  store_in_hoard(100000);
+ }
+ void go_pick_up_those_three_blocks3(){
+  point_drive(90,95,0);
+  point_drive(45,95,0);
+  PID_drive(-45);
+ }
 
 void pre_auton(void) {
   int timeout = 0;
@@ -650,11 +657,14 @@ if (match_auton==false){
   pick_up_side_blocks();
   go_to_long_goal();
   park();
-  store_in_hoard(20);
-  go_to_long_goal2();
   PID_drive(-5);
   park2();
   go_to_long_goal2();
+  pick_up_block_continusly();
+  PID_drive(-4);
+  go_pick_up_those_three_blocks3();
+  go_to_long_goal2();
+  park();
 }
 }
 }
