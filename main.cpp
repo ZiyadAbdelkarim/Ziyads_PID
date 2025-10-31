@@ -502,8 +502,16 @@ void go_pick_up_those_three_blocks2(){
  }
     store_in_hoard(4);
 }
-
-
+ void park(){
+  point_drive(62,14.86,180);
+  store_in_hoard(4);
+ }
+ void pick_up_side_blocks(){
+  point_drive(0.9, 26);
+  store_in_hoard(3);
+  point_drive(139, 26);
+  store_in_hoard(4);
+ }
 
 
 void pre_auton(void) {
@@ -643,7 +651,10 @@ if (match_auton==false){
   go_to_long_goal2();
   PID_drive(-3);
   PID_drive(3);
-  
+  park();
+  go_to_long_goal();
+  pick_up_side_blocks();
+  go_to_long_goal();
 }
 }
 }
