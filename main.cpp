@@ -1,4 +1,4 @@
-*----------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------*/
 /*                                                                            */
 /*    Module:       main.cpp                                                  */
 /*    Author:       azabd                                                     */
@@ -62,12 +62,12 @@ void drive_brake(){
   RMF.stop(brake);
 }
 void reset_drive(){
-  LMB.resetRotation();
-  LMM.resetRotation();
-  LMF.resetRotation();
-  RMB.resetRotation();
-  RMM.resetRotation();
-  RMF.resetRotation();
+  LMB.resetPosition();
+  LMM.resetPosition();
+  LMF.resetPosition();
+  RMB.resetPosition();
+  RMM.resetPosition();
+  RMF.resetPosition();
 }
 // Constants
 double wheel_dia = 3.25;
@@ -246,13 +246,13 @@ void checkSpeed(){
   }
 }
 void checkTempature(){
-  double motor_temp_LMB = LMB.temp(temperatureUnits::celsius);
-  double motor_temp_LMM = LMM.temp(temperatureUnits::celsius);
-  double motor_temp_LMF = LMF.temp(temperatureUnits::celsius);
+  double motor_temp_LMB = LMB.temperature(temperatureUnits::celsius);
+  double motor_temp_LMM = LMM.temperature(temperatureUnits::celsius);
+  double motor_temp_LMF = LMF.temperature(temperatureUnits::celsius);
 
-  double motor_temp_RMB = RMB.temp(temperatureUnits::celsius);
-  double motor_temp_RMM = RMM.temp(temperatureUnits::celsius);
-  double motor_temp_RMF = RMF.temp(temperatureUnits::celsius);
+  double motor_temp_RMB = RMB.temperature(temperatureUnits::celsius);
+  double motor_temp_RMM = RMM.temperature(temperatureUnits::celsius);
+  double motor_temp_RMF = RMF.temperature(temperatureUnits::celsius);
   double motor_temp[] = {motor_temp_LMB, motor_temp_LMM,motor_temp_LMF,motor_temp_RMB,motor_temp_RMM,motor_temp_RMF};
   std::vector<int> motorsIncluded;
   std::string motorNames[] = { "LMB", "LMM", "LMF", "RMB", "RMM", "RMF" };
@@ -311,7 +311,6 @@ void point_drive(double x_pos, double y_pos, double angle_orentaiton){
 enum class Corner{left_red,right_red,left_blue,right_blue, not_selected };
 Corner selected_corner = Corner::not_selected; 
 void GUI_selection(){
-  Brain.Screen.setFont(FontType::PROP40);
   Brain.Screen.setFillColor(red); 
   Brain.Screen.drawRectangle(0,0,120,136);
   Brain.Screen.setFillColor(red); 
@@ -325,10 +324,10 @@ void GUI_selection(){
   Brain.Screen.setFillColor(black); 
   Brain.Screen.drawLine(0,(272/2),480,0);
   Brain.Screen.setPenColor(color::white);
-  Brain.Screen.drawText(10, (272/4), "Red Left Corner");
-  Brain.Screen.drawText(250, (272/4), "Red Right Corner");
-  Brain.Screen.drawText(10, (3*(272/4)), "Blue Left Corner");
-  Brain.Screen.drawText(250, (3*(272/4)), "Blue Right Corner");
+  Brain.Screen.printAt(10, (272/4), "Red Left Corner");
+  Brain.Screen.printAt(250, (272/4), "Red Right Corner");
+  Brain.Screen.printAt(10, (3*(272/4)), "Blue Left Corner");
+  Brain.Screen.printAt(250, (3*(272/4)), "Blue Right Corner");
   if (match_auton == true){
     while (selected_corner == Corner::not_selected){
       if (Brain.Screen.pressing()){
@@ -667,27 +666,27 @@ void usercontrol(void) {
   bool toggle_hood_new = true;
   bool toggle_hood_old = false;
   while (1) {
-    if (Controller1.buttonR1.pressing()){
+    if (Controller1.ButtonR1.pressing()){
       stop_intake();
       task::sleep(10);
       score_long_goal(1000000);
     }
-    if (Controller1.buttonR2.pressing()){
+    if (Controller1.ButtonR2.pressing()){
      task::sleep(10);
       stop_intake();
       store_in_hoard(10000000);
     }
-    if (Controller1.buttonL1.pressing()){
+    if (Controller1.ButtonL1.pressing()){
       task::sleep(10);
       stop_intake();
       score_middle(10000000);
     }
-    if (Controller1.buttonL2.pressing()){
+    if (Controller1.ButtonL2.pressing()){
      task::sleep(10);
       stop_intake();
       score_lower(1000000000);
     }
-    if (Controller1.buttonA.pressing()){
+    if (Controller1.ButtonA.pressing()){
       if (toggle_scrapper_new == true && toggle_scrapper_old == false){
         task::sleep(10);
         scraper.set(true);
@@ -698,7 +697,7 @@ void usercontrol(void) {
         scraper.set(false);
         toggle_scrapper_old = !toggle_scrapper_old;        
       }
-    if (Controller1.buttonB.pressing())
+    if (Controller1.ButtonB.pressing())
       if (toggle_hood_old == false && toggle_hood_new == true){
         task::sleep(10);
         hood.set(true);
