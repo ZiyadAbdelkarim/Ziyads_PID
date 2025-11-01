@@ -39,6 +39,7 @@ motor FI(PORT8, gearSetting::ratio18_1, false);
 motor HI(PORT9, gearSetting::ratio18_1, false);
 motor TI(PORT10, gearSetting::ratio18_1, false);
 distance DistanceSensor(PORT11);
+distance DistanceSensor2(PORT12);
 void stop_intake(){
   FI.stop();
   TI.stop();
@@ -54,7 +55,9 @@ void drive(int left_speed, int right_speed){
   RMM.spin(forward, right_speed, voltageUnits::mV);
   RMF.spin(forward, right_speed, voltageUnits::mV);
 }
-
+void left_drive(){
+  
+}
 void drive_brake(){
   LMB.stop(brake);
   LMM.stop(brake);
@@ -95,9 +98,9 @@ void PID_drive(double target_dist){
     double abs_error = fabs(error);
     double abs_derivative = fabs(derivative);
     double abs_intergral = fabs(intergral);
-    double KP = 0.90 + 4.60 * (1 - exp(-abs_error / 25));
-    double KD = 0.08 + 0.40 * (1 - exp(-abs_derivative / 20.0));
-    double KI = 0.0005 + 0.015 * (1 - exp(-abs_intergral / 60.0));
+    double KP = 0.90 + 4.60 * (exp(-abs_error / 3));
+    double KD = 0.08 + 0.40 * (exp(-abs_derivative / 4));
+    double KI = 0.0005 + 0.015 * (exp(-abs_intergral / 5));
     if (fabs(intergral)>1000){
       intergral=1000*(intergral/fabs(intergral));
     }
@@ -136,9 +139,9 @@ void Gyro_turn(double target_angle, bool gyro_reset){
     double abs_t_derivative = fabs(t_derivative);
     double abs_t_intergral = fabs(t_intergral);
     // KP,KI,KD
-    double TKP = 0.9 + 4.6 * (1 - exp(-abs_t_error / 25));
-    double TKD = 0.10 + 0.4 * (1 - exp(-abs_t_derivative / 18));
-    double TKI = 0.00001 + 0.008 * (1 - exp(-abs_t_intergral / 60));
+    double TKP = 0.9 + 4.6 * (exp(-abs_t_error / 1));
+    double TKD = 0.10 + 0.4 * (exp(-abs_t_derivative / .1));
+    double TKI = 0.00001 + 0.008 * (exp(-abs_t_intergral/.2));
     if (fabs(t_intergral)>1000){
       t_intergral=1000*(t_intergral/fabs(t_intergral));
     }
@@ -420,7 +423,6 @@ void score_long_goal(int time){
   task::sleep(20);
    stop_intake();
 }
-distance DistanceSensor2(PORT12);
 void go_to_long_goal(){
   if (selected_corner == Corner::left_red || selected_corner == Corner::right_blue){
     point_drive(48.81, 117.00, 90);
