@@ -196,7 +196,6 @@ void checkTorque(){
     for (int idx : motorsIncluded) {
       Brain.Screen.print(" %s(%.2f)", motorNames[idx].c_str(), motor_torque[idx]);
     }
-  drive_brake();
 }
 
 }
@@ -358,7 +357,7 @@ void store_in_hoard(int time){
     HI.spin(forward, 12000,voltageUnits::mV);
     task::sleep(time);
    timeout+=time;
-}
+  }
   if(DistanceSensor2.objectDistance(inches)<0.75 && DistanceSensor2.objectDistance(inches)> 0.0 && DistanceSensor.objectDistance(inches)>0.75&& timeout < 200){
     FI.spin(reverse, 12000,voltageUnits::mV);
     HI.spin(forward, 12000,voltageUnits::mV);
@@ -366,6 +365,7 @@ void store_in_hoard(int time){
     task::sleep(time);
    timeout+=time;
   }
+  task::sleep(time);
    stop_intake();
 }
 void score_middle(int time){
@@ -380,6 +380,7 @@ void score_middle(int time){
     task::sleep(time);
     timeout+=time;
   }
+  task::sleep(time);
   stop_intake();
 }  
 void score_lower(int time){
@@ -394,6 +395,7 @@ void score_lower(int time){
     task::sleep(time);
     timeout+=time;
   }
+   task::sleep(time);
    stop_intake();
 }
 void score_long_goal(int time){
@@ -408,9 +410,9 @@ void score_long_goal(int time){
     FI.spin(forward,12000,voltageUnits::mV);
     TI.spin(forward,12000,voltageUnits::mV);
     HI.spin(forward,12000,voltageUnits::mV);
-    task::sleep(time);
     timeout+=time;
   }
+  task::sleep(time);
    stop_intake();
 }
 void go_to_long_goal(){
@@ -585,7 +587,7 @@ else if(!regularPID) {
   go_to_long_goal();
   PID_drive(-3);
   Gyro_turn(0, false);
-  task::sleep(0.5);
+  task::sleep(100);
   PID_drive(2);
   pick_up_blocks_under_the_long_goal();
   go_to_upper_middle_goal();
@@ -610,7 +612,7 @@ if (match_auton==false){
   go_to_long_goal();
   PID_drive(-3);
   Gyro_turn(0, false);
-  task::sleep(0.5);
+  task::sleep(100);
   PID_drive(2);
   pick_up_blocks_under_the_long_goal();
   go_to_upper_middle_goal();
@@ -633,7 +635,7 @@ if (match_auton==false){
   go_to_long_goal2();
   PID_drive(-3);
   Gyro_turn(0, false);
-  task::sleep(0.5);
+  task::sleep(100);
   PID_drive(2);
   pick_up_blocks_under_the_long_goal2();
   go_to_upper_middle_goal();
@@ -682,7 +684,7 @@ void usercontrol(void) {
       score_middle(10000000);
     }
     if (Controller1.ButtonL2.pressing()){
-     task::sleep(10);
+      task::sleep(10);
       stop_intake();
       score_lower(1000000000);
     }
@@ -706,7 +708,7 @@ void usercontrol(void) {
       if (toggle_hood_new == false && toggle_hood_old==true){
         task::sleep(10);
         hood.set(false);
-        toggle_hood_old= !toggle_hood_old;        
+        toggle_hood_new= !toggle_hood_new;        
       }
     }
       task::sleep(20); 
