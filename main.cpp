@@ -13,11 +13,14 @@
 using namespace vex;
 #include <iostream>
 #include <vector>
+#include <limits>
+const int infinity = std::numeric_limits<int>::max();
 competition Competition;
 brain Brain;
 controller Controller1;
 bool regularPID = false;
 bool match_auton = false;
+
 // Left motors
 motor LMB(PORT1, gearSetting::ratio18_1,true);
 motor LMM(PORT2, gearSetting::ratio18_1,true);
@@ -36,7 +39,6 @@ motor FI(PORT8, gearSetting::ratio18_1, false);
 motor HI(PORT9, gearSetting::ratio18_1, false);
 motor TI(PORT10, gearSetting::ratio18_1, false);
 distance DistanceSensor(PORT11);
-distance DistanceSensor2(PORT12);
 void stop_intake(){
   FI.stop();
   TI.stop();
@@ -356,14 +358,14 @@ void store_in_hoard(int time){
     FI.spin(forward, 12000,voltageUnits::mV);
     HI.spin(forward, 12000,voltageUnits::mV);
     task::sleep(time);
-   timeout+=time;
+   timeout+=20;
   }
   if(DistanceSensor2.objectDistance(inches)<0.75 && DistanceSensor2.objectDistance(inches)> 0.0 && DistanceSensor.objectDistance(inches)>0.75&& timeout < 200){
     FI.spin(reverse, 12000,voltageUnits::mV);
     HI.spin(forward, 12000,voltageUnits::mV);
     TI.spin(reverse, 12000,voltageUnits::mV);
-    task::sleep(time);
-   timeout+=time;
+    task::sleep(20);
+   timeout+=20;
   }
   task::sleep(time);
    stop_intake();
@@ -372,30 +374,33 @@ void score_middle(int time){
   int timeout = 0;
   while(DistanceSensor.objectDistance(inches)<0.75 && DistanceSensor.objectDistance(inches)> 0.0 && timeout < 200){
     FI.spin(reverse,12000,voltageUnits::mV);
-   timeout+=time;
+    task::sleep(20);
+    timeout+=20;
   }
   if (DistanceSensor.objectDistance(inches)>0.75){
     FI.spin(reverse,12000,voltageUnits::mV);
     HI.spin(reverse,12000,voltageUnits::mV);
-    task::sleep(time);
-    timeout+=time;
+    task::sleep(20);
+    timeout+=20;
   }
-  task::sleep(time);
+  task::sleep(20);
   stop_intake();
 }  
 void score_lower(int time){
   int timeout = 0;
   while(DistanceSensor.objectDistance(inches)<0.75 &&  DistanceSensor.objectDistance(inches)> 0.0 && timeout < 200){
     FI.spin(forward,12000,voltageUnits::mV);
-    timeout+=time;
+    HI.spin(forward,1200,voltageUnits::mV);
+    task::sleep(20);
+    timeout+=20;
 }
   if(DistanceSensor.objectDistance(inches)>0.75){
     FI.spin(forward,12000,voltageUnits::mV);
     HI.spin(forward,12000,voltageUnits::mV);
-    task::sleep(time);
-    timeout+=time;
+    task::sleep(20);
+    timeout+=20;
   }
-   task::sleep(time);
+   task::sleep(20);
    stop_intake();
 }
 void score_long_goal(int time){
@@ -403,18 +408,19 @@ void score_long_goal(int time){
     while(DistanceSensor.objectDistance(inches)<0.75 && DistanceSensor.objectDistance(inches)> 0.0 && timeout < 200){
     FI.spin(forward,12000,voltageUnits::mV);
     TI.spin(forward,12000,voltageUnits::mV);
-    task::sleep(time);
-    timeout+=time;
+    task::sleep(20);
+    timeout+=20;
 }
   if(DistanceSensor.objectDistance(inches)>0.75){
     FI.spin(forward,12000,voltageUnits::mV);
     TI.spin(forward,12000,voltageUnits::mV);
     HI.spin(forward,12000,voltageUnits::mV);
-    timeout+=time;
+    timeout+=20;
   }
-  task::sleep(time);
+  task::sleep(20);
    stop_intake();
 }
+distance DistanceSensor2(PORT12);
 void go_to_long_goal(){
   if (selected_corner == Corner::left_red || selected_corner == Corner::right_blue){
     point_drive(48.81, 117.00, 90);
@@ -671,22 +677,22 @@ void usercontrol(void) {
     if (Controller1.ButtonR1.pressing()){
       stop_intake();
       task::sleep(10);
-      score_long_goal(1000000);
+      score_long_goal(infinity);
     }
     if (Controller1.ButtonR2.pressing()){
      task::sleep(10);
       stop_intake();
-      store_in_hoard(10000000);
+      store_in_hoard(infinity);
     }
     if (Controller1.ButtonL1.pressing()){
       task::sleep(10);
       stop_intake();
-      score_middle(10000000);
+      score_middle(infinity);
     }
     if (Controller1.ButtonL2.pressing()){
       task::sleep(10);
       stop_intake();
-      score_lower(1000000000);
+      score_lower(infinity);
     }
     if (Controller1.ButtonA.pressing()){
       if (toggle_scrapper_new == true && toggle_scrapper_old == false){
