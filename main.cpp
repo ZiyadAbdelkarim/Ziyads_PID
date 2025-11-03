@@ -505,7 +505,13 @@ void go_pick_up_those_three_blocks2(){
  void pick_up_side_blocks(){
   point_drive(0.9, 26, 0);
   store_in_hoard(3);
-  point_drive(139, 26,0);
+  point_drive(139, 26,180);
+  store_in_hoard(4000);
+ }
+ void pick_up_side_blocks2(){
+  point_drive(0.9, 98, 0);
+  store_in_hoard(3);
+  point_drive(139, 98,180);
   store_in_hoard(4000);
  }
  void pick_up_block_continusly(){
@@ -617,31 +623,30 @@ if (match_auton==false){
   hood.set(true);
   PID_drive(-2);
   go_pick_up_those_three_blocks();
+  PID_drive(-6);
+  pick_up_side_blocks();
+  PID_drive(-24);
+  hood.set(false);
   go_to_long_goal();
   PID_drive(-3);
-  Gyro_turn(0, false);
-  task::sleep(100);
+  PID_drive(3);
+  Gyro_turn(0,false);
   PID_drive(2);
   pick_up_blocks_under_the_long_goal();
   go_to_upper_middle_goal();
   PID_drive(-2);
   go_to_lower_middle_goal();
   PID_drive(-2); 
-  hood.set(false);
-  go_to_long_goal();
-  PID_drive(-3);
-  PID_drive(3);
-  PID_drive(-1);
   scraper.set(true);
-  hood.set(false);
   go_to_match_loader2();
-  scraper.set(false);
   PID_drive(2);
   hood.set(true);
   PID_drive(-2);
   go_pick_up_those_three_blocks2();
   go_to_long_goal2();
+  hood.set(false);
   PID_drive(-3);
+  PID_drive(3);
   Gyro_turn(0, false);
   task::sleep(100);
   PID_drive(2);
@@ -650,13 +655,12 @@ if (match_auton==false){
   PID_drive(-2);
   go_to_lower_middle_goal();
   PID_drive(-2); 
-  hood.set(false);
   go_to_long_goal2();
   PID_drive(-3);
   PID_drive(3);
   park();
   go_to_long_goal2();
-  pick_up_side_blocks();
+  pick_up_side_blocks2();
   go_to_long_goal2();
   park();
   PID_drive(-5);
