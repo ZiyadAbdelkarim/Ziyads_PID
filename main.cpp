@@ -325,8 +325,61 @@ void checkTempature(){
       Brain.Screen.newLine();
     }
   
-  drive_brake();
+
   }
+void checkCurrent(){
+  double current_LMB = LMB.current();
+  double current_LMM = LMM.current();
+  double current_LMF = LMF.current();
+  double current_RMB = RMB.current();
+  double current_RMM = RMM.current();
+  double current_RMF = RMF.current();
+  double current_FI = HI.temperature(temperatureUnits::celsius);
+  double current_HI = HI.temperature(temperatureUnits::celsius);
+  double current_TI = TI.temperature(temperatureUnits::celsius);
+  double motor_current[] = {current_LMB, current_LMM,current_LMF,current_RMB,current_RMM,current_RMF, current_FI, current_HI, current_TI};
+  std::vector<int> motorsIncluded;
+  std::string motorNames[] = { "LMB", "LMM", "LMF", "RMB", "RMM", "RMF", "FI", "HI", "TI};
+  Brain.Screen.setCursor(1,95);
+  Brain.Screen.setPenColor(color::white);
+  Brain.Screen.print("LMB current: %.2f C", current_LMB);
+  Brain.Screen.newLine();
+  Brain.Screen.print("LMM current: %.2f C", current_LMM);
+  Brain.Screen.newLine();
+  Brain.Screen.print("LMF current: %.2f C", current_LMF);
+  Brain.Screen.newLine();
+  Brain.Screen.print("RMB current: %.2f C", current_RMB);
+  Brain.Screen.newLine();
+  Brain.Screen.print("RMM current: %.2f C", current_RMM);
+  Brain.Screen.newLine();
+  Brain.Screen.print("RMF current: %.2f C", current_RMF);
+  Brain.Screen.newLine();
+  Brain.Screen.print("FI current: %.2f C", current_FI);
+  Brain.Screen.newLine();
+  Brain.Screen.newLine();
+  Brain.Screen.print("HI temp: %.2f C", current_HI);
+  Brain.Screen.newLine();
+  Brain.Screen.newLine();
+  Brain.Screen.print("TI temp: %.2f C", current_TI);
+  Brain.Screen.setPenColor(color::orange);
+  Brain.Screen.newLine();
+  Brain.Screen.print("EXTREME CURRENT MOTORS:");
+  Brain.Screen.newLine();
+  for (int i = 0; i < 6; ++i) {
+    if (motor_current[i] <0.5 ||motor_current[i] >2) {
+      motorsIncluded.push_back(i);
+    }
+  }
+  if (motorsIncluded.empty()){
+      Brain.Screen.setPenColor(color::white);
+      Brain.Screen.print("NONE");
+  }
+  else {
+    Brain.Screen.setPenColor(color::red);
+    for (int idx : motorsIncluded) {
+      Brain.Screen.print(" %s(%.2f)", motorNames[idx].c_str(), motor_temp[idx]);
+      Brain.Screen.newLine();
+    }
 }
 double x_pos_original = 107.6;
 double y_pos_original = 28.9;
