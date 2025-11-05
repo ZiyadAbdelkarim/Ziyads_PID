@@ -32,6 +32,7 @@ motor RMM(PORT5, gearSetting::ratio18_1,false);
 motor RMF(PORT6, gearSetting::ratio18_1,false);
 digital_out scraper(Brain.ThreeWirePort.A);
 digital_out hood(Brain.ThreeWirePort.B);
+digital_out descore(Brain.ThreeWirePort.C);
 // Gyro
 inertial Gyro(PORT7);
 
@@ -688,6 +689,8 @@ void usercontrol(void) {
   bool toggle_scrapper_old = false;
   bool toggle_hood_new = true;
   bool toggle_hood_old = false;
+  bool toggle_descore_new = true;
+  bool toggle_descore_old = false;
   double forward = Controller1.axis2.position(precent);
   double turn = Controller1.axis4.position(precent);
   double turnSensitivity = 1.0 - (fabs(forward) / 100.0) * 0.6;
@@ -738,6 +741,20 @@ void usercontrol(void) {
         task::sleep(10);
         hood.set(false);
         toggle_hood_new= !toggle_hood_new;        
+      }
+    }
+      task::sleep(20); 
+  }
+  if (Controller1.ButtonC.pressing())
+      if (toggle_descore_old == false && toggle_descore_new == true){
+        task::sleep(10);
+        hood.set(true);
+        toggle_descore_new = !toggle_descore_new;
+      }
+      if (toggle_descore_new == false && toggle_descore_old==true){
+        task::sleep(10);
+        hood.set(false);
+        toggle_descore_new= !toggle_descore_new;        
       }
     }
       task::sleep(20); 
