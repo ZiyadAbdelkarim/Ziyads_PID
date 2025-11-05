@@ -688,8 +688,15 @@ void usercontrol(void) {
   bool toggle_scrapper_old = false;
   bool toggle_hood_new = true;
   bool toggle_hood_old = false;
+  double forward = Controller1.axis2.position(precent);
+  double turn = Controller1.axis4.position(precent);
+  double turnSensitivity = 1.0 - (fabs(forward) / 100.0) * 0.6;
+  double turn *= turnSensitivity;
+  double rightSpeed = ((forward+turn)/1200)*100;
+  double leftSpeed = ((forward-turn)/1200)*100;
   while (1) {
-    
+    drive(rightSpeed, leftSpeed);
+    task::sleep(20):
     if (Controller1.ButtonR1.pressing()){
       stop_intake();
       task::sleep(10);
