@@ -55,8 +55,17 @@ void drive(int left_speed, int right_speed){
   RMM.spin(forward, right_speed, voltageUnits::mV);
   RMF.spin(forward, right_speed, voltageUnits::mV);
 }
-void left_drive(){
-  
+void left_drive(int left_speed){
+  left_speed = (left_speed/1200)*100;
+  LMB.spin(forward, left_speed, voltageUnits::mV);
+  LMM.spin(forward, left_speed, voltageUnits::mV);
+  LMF.spin(forward, left_speed, voltageUnits::mV);
+}
+void right_drive(int right_speed){
+  right_speed = (right_speed/1200)*100;
+  RMB.spin(forward, right_speed, voltageUnits::mV);
+  RMM.spin(forward, right_speed, voltageUnits::mV);
+  RMF.spin(forward, right_speed, voltageUnits::mV);
 }
 void drive_brake(){
   LMB.stop(brake);
@@ -357,13 +366,13 @@ void GUI_selection(){
 }
 void store_in_hoard(int time){
   int timeout =0;
-  while(DistanceSensor2.objectDistance(inches)<0.75 && DistanceSensor2.objectDistance(inches)> 0.0 && timeout < 200){
+  while(DistanceSensor2.objectDistance(inches)<0.75 && DistanceSensor2.objectDistance(inches)>= 0.0 && timeout < 200){
     FI.spin(forward, 12000,voltageUnits::mV);
     HI.spin(forward, 12000,voltageUnits::mV);
     task::sleep(time);
    timeout+=20;
   }
-  if(DistanceSensor2.objectDistance(inches)<0.75 && DistanceSensor2.objectDistance(inches)> 0.0 && DistanceSensor.objectDistance(inches)>0.75&& timeout < 200){
+  if(DistanceSensor2.objectDistance(inches)<0.75 && DistanceSensor2.objectDistance(inches)>= 0.0 && DistanceSensor.objectDistance(inches)>0.75&& timeout < 200){
     FI.spin(reverse, 12000,voltageUnits::mV);
     HI.spin(forward, 12000,voltageUnits::mV);
     TI.spin(reverse, 12000,voltageUnits::mV);
@@ -375,7 +384,7 @@ void store_in_hoard(int time){
 }
 void score_middle(int time){
   int timeout = 0;
-  while(DistanceSensor.objectDistance(inches)<0.75 && DistanceSensor.objectDistance(inches)> 0.0 && timeout < 200){
+  while(DistanceSensor.objectDistance(inches)<0.75 && DistanceSensor.objectDistance(inches)>= 0.0 && timeout < 200){
     FI.spin(reverse,12000,voltageUnits::mV);
     task::sleep(20);
     timeout+=20;
@@ -391,7 +400,7 @@ void score_middle(int time){
 }  
 void score_lower(int time){
   int timeout = 0;
-  while(DistanceSensor.objectDistance(inches)<0.75 &&  DistanceSensor.objectDistance(inches)> 0.0 && timeout < 200){
+  while(DistanceSensor.objectDistance(inches)<0.75 &&  DistanceSensor.objectDistance(inches)>= 0.0 && timeout < 200){
     FI.spin(forward,12000,voltageUnits::mV);
     HI.spin(forward,1200,voltageUnits::mV);
     task::sleep(20);
@@ -680,6 +689,7 @@ void usercontrol(void) {
   bool toggle_hood_new = true;
   bool toggle_hood_old = false;
   while (1) {
+    
     if (Controller1.ButtonR1.pressing()){
       stop_intake();
       task::sleep(10);
