@@ -178,9 +178,12 @@ void checkTorque(){
   double motor_torque_RMB = RMB.torque(torqueUnits::Nm);
   double motor_torque_RMM = RMM.torque(torqueUnits::Nm);
   double motor_torque_RMF = RMF.torque(torqueUnits::Nm);
-  double motor_torque[] = {motor_torque_LMB, motor_torque_LMF,motor_torque_LMM,motor_torque_RMB,motor_torque_RMF,motor_torque_RMM};
+  double motor_torque_FI = FI.torque(torqueUnits::Nm);
+  double pmotor_torque_HI = HI.torque(torqueUnits::Nm);
+  double motor_torque_TI = TI.torque(torqueUnits::Nm);
+  double motor_torque[] = {motor_torque_LMB, motor_torque_LMF,motor_torque_LMM,motor_torque_RMB,motor_torque_RMF,motor_torque_RMM, motor_torque_FI, motor_torque_HI, motor_torque_TI};
   std::vector<int> motorsIncluded;
-  std::string motorNames[] = { "LMB", "LMF", "LMM", "RMB", "RMF", "RMM" };
+  std::string motorNames[] = { "LMB", "LMF", "LMM", "RMB", "RMF", "RMM", "FI", "HI", "TI"};
   Brain.Screen.clearScreen();
   Brain.Screen.setCursor(1, 1);
   Brain.Screen.setPenColor(color::white);
@@ -196,6 +199,11 @@ void checkTorque(){
   Brain.Screen.newLine();
   Brain.Screen.print("RMF Torque: %.2f Nm", motor_torque_RMF);
   Brain.Screen.newLine();
+  Brain.Screen.print("FI Torque: %.2f Nm", motor_torque_FI);
+  Brain.Screen.newLine();
+  Brain.Screen.print("HI Torque: %.2f Nm", motor_torque_HI);
+  Brain.Screen.newLine();
+  Brain.Screen.print("TI Torque: %.2f Nm", motor_torque_TI);
   Brain.Screen.print("LOW TOURQUE MOTORS:");
   for (int i = 0; i < 6; ++i) {
     if (motor_torque[i] < 1.2) {
@@ -222,9 +230,12 @@ void checkSpeed(){
   double motor_velocity_RMB = RMB.velocity(velocityUnits::rpm);
   double motor_velocity_RMM = RMM.velocity(velocityUnits::rpm);
   double motor_velocity_RMF = RMF.velocity(velocityUnits::rpm);
-  double motor_speed[] = {motor_velocity_LMB, motor_velocity_LMM,motor_velocity_LMF,motor_velocity_RMB,motor_velocity_RMM,motor_velocity_RMF};
+  double motor_velocity_FI = FI.velocity(velocityUnits::rpm);
+  double pmotor_velocity_HI = HI.velocity(velocityUnits::rpm);
+  double motor_velocity_TI = TI.velocity(velocityUnits::rpm);
+  double motor_velocity[] = {motor_velocity_LMB, motor_velocity_LMM,motor_velocity_LMF,motor_velocity_RMB,motor_velocity_RMM,motor_velocity_RMF, motor_velocity_FI, motor_veocity_HI, motor_veocity_TI};
   std::vector<int> motorsIncluded;
-  std::string motorNames[] = { "LMB", "LMM", "LMF", "RMB", "RMM", "RMF" };
+  std::string motorNames[] = { "LMB", "LMM", "LMF", "RMB", "RMM", "RMF", "FI", "HI", "TI"};
   Brain.Screen.setCursor(1,30);
   Brain.Screen.setPenColor(color::white);
   Brain.Screen.print("LMB velocity: %.2f rpm", motor_velocity_LMB);
@@ -267,9 +278,12 @@ void checkTempature(){
   double motor_temp_RMB = RMB.temperature(temperatureUnits::celsius);
   double motor_temp_RMM = RMM.temperature(temperatureUnits::celsius);
   double motor_temp_RMF = RMF.temperature(temperatureUnits::celsius);
-  double motor_temp[] = {motor_temp_LMB, motor_temp_LMM,motor_temp_LMF,motor_temp_RMB,motor_temp_RMM,motor_temp_RMF};
+  double motor_temp_FI = HI.temperature(temperatureUnits::celsius);
+  double motor_temp_HI = HI.temperature(temperatureUnits::celsius);
+  double motor_temp_TI = TI.temperature(temperatureUnits::celsius);
+  double motor_temp[] = {motor_temp_LMB, motor_temp_LMM,motor_temp_LMF,motor_temp_RMB,motor_temp_RMM,motor_temp_RMF, motor_temp_FI, motor_temp_HI, motor_temp_TI};
   std::vector<int> motorsIncluded;
-  std::string motorNames[] = { "LMB", "LMM", "LMF", "RMB", "RMM", "RMF" };
+  std::string motorNames[] = { "LMB", "LMM", "LMF", "RMB", "RMM", "RMF", "FI", "HI", "TI};
   Brain.Screen.setCursor(1,65);
   Brain.Screen.setPenColor(color::white);
   Brain.Screen.print("LMB temp: %.2f C", motor_temp_LMB);
@@ -283,6 +297,14 @@ void checkTempature(){
   Brain.Screen.print("RMM temp: %.2f C", motor_temp_RMM);
   Brain.Screen.newLine();
   Brain.Screen.print("RMF temp: %.2f C", motor_temp_RMF);
+  Brain.Screen.newLine();
+  Brain.Screen.print("FI temp: %.2f C", motor_temp_FI);
+  Brain.Screen.newLine();
+  Brain.Screen.newLine();
+  Brain.Screen.print("HI temp: %.2f C", motor_temp_HI);
+  Brain.Screen.newLine();
+  Brain.Screen.newLine();
+  Brain.Screen.print("TI temp: %.2f C", motor_temp_TI);
   Brain.Screen.setPenColor(color::orange);
   Brain.Screen.newLine();
   Brain.Screen.print("HIGH TEMPERATURE MOTORS:");
