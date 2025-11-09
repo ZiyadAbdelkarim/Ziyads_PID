@@ -14,13 +14,13 @@ using namespace vex;
 #include <iostream>
 #include <vector>
 #include <limits>
-const int infinity = std::numeric_limits<int>::max();
+const int infinity2 = std::numeric_limits<int>::max();
 competition Competition;
 brain Brain;
 controller Controller1;
 bool regularPID = false;
 bool match_auton = false;
-
+bool Feildside = false;
 // Left motors
 motor LMB(PORT1, gearSetting::ratio18_1,true);
 motor LMM(PORT2, gearSetting::ratio18_1,true);
@@ -33,13 +33,12 @@ motor RMF(PORT6, gearSetting::ratio18_1,false);
 digital_out scraper(Brain.ThreeWirePort.A);
 digital_out hood(Brain.ThreeWirePort.B);
 // Gyro
+optical Optical = optical(PORT3);
 inertial Gyro(PORT7);
 
 motor FI(PORT8, gearSetting::ratio18_1, false);
 motor HI(PORT9, gearSetting::ratio18_1, false);
 motor TI(PORT10, gearSetting::ratio18_1, false);
-distance DistanceSensor(PORT11);
-distance DistanceSensor2(PORT12);
 void stop_intake(){
   FI.stop();
   TI.stop();
@@ -347,33 +346,26 @@ void GUI_selection(){
         int x = Brain.Screen.xPosition();
         int y = Brain.Screen.yPosition();
         if(x < 240 && y < 136){
-        selected_corner = Corner::left_red;
+          selected_corner = Corner::left_red;
+          Feildside=false;
        }
         if (x>240 && y<136){
           selected_corner = Corner::right_red;
+          Feildside=false;
    }
         if (x<240 && y>136){
           selected_corner = Corner::left_blue;
+          Feildside=true;
    }
         if (x>240 && y>136){
             selected_corner = Corner::right_blue;
+            Feildside=true;
   }
 }
  }
   }
    Brain.Screen.setCursor(1,1);
    Brain.Screen.print("please press brain when ready");
-}
-void store_in_hoard(int time){
-  int timeout =0;
-    FI.spin(forward, 12000,voltageUnits::mV);
-    HI.spin(forward, 12000,voltageUnits::mV);
-    task::sleep(4000);
-    FI.spin(reverse, 12000,voltageUnits::mV);
-    TI.spin(reverse, 12000,voltageUnits::mV);
-    task::sleep(20);
-    task::sleep(time);
-    stop_intake();
 }
 void score_middle(int time){
     time = 4000;
@@ -383,8 +375,34 @@ void score_middle(int time){
     HI.spin(reverse,12000,voltageUnits::mV);
     task::sleep(time);
     stop_intake();
-}  
+} 
+void colorSort(){
+  if (match_auton==true){
+    while (Optical.color() == red && Feildside == true || Optical.color() == blue && Feildside == false){
+      score_middle(infinity2);
+    }
+    while (Optical.color() == red && Feildside == false || Optical.color() == blue && Feildside == true){
+      break;
+    }
+    while (Optical.color()!= red && Optical.color()!=blue){
+      break;
+    }
+  } 
+} 
+void store_in_hoard(int time){
+  int timeout =0;
+    colorSort();
+    FI.spin(forward, 12000,voltageUnits::mV);
+    HI.spin(forward, 12000,voltageUnits::mV);
+    task::sleep(4000);
+    FI.spin(reverse, 12000,voltageUnits::mV);
+    TI.spin(reverse, 12000,voltageUnits::mV);
+    task::sleep(20);
+    task::sleep(time);
+    stop_intake();
+}
 void score_lower(int time){
+    colorSort();
     FI.spin(forward,12000,voltageUnits::mV);
     HI.spin(forward,1200,voltageUnits::mV);
     task::sleep(4000);
@@ -394,6 +412,7 @@ void score_lower(int time){
     stop_intake();
 }
 void score_long_goal(int time){
+    colorSort();
     FI.spin(forward,12000,voltageUnits::mV);
     TI.spin(forward,12000,voltageUnits::mV);
     task::sleep(4000);
@@ -672,22 +691,22 @@ void usercontrol(void) {
     if (Controller1.ButtonR1.pressing()){
       stop_intake();
       task::sleep(10);
-      score_long_goal(infinity);
+      score_long_goal(infinity2);
     }
     if (Controller1.ButtonR2.pressing()){
      task::sleep(10);
       stop_intake();
-      store_in_hoard(infinity);
+      store_in_hoard(infinity2);
     }
     if (Controller1.ButtonL1.pressing()){
       task::sleep(10);
       stop_intake();
-      score_middle(infinity);
+      score_middle(infinity2);
     }
     if (Controller1.ButtonL2.pressing()){
       task::sleep(10);
       stop_intake();
-      score_lower(infinity);
+      score_lower(infinity2);
     }
     if (Controller1.ButtonA.pressing()){
       if (toggle_scrapper_new == true && toggle_scrapper_old == false){
