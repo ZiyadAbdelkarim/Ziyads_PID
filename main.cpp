@@ -32,7 +32,6 @@ motor RMM(PORT5, gearSetting::ratio18_1,false);
 motor RMF(PORT6, gearSetting::ratio18_1,false);
 digital_out scraper(Brain.ThreeWirePort.A);
 digital_out hood(Brain.ThreeWirePort.B);
-digital_out descore(Brain.ThreeWirePort.C);
 // Gyro
 inertial Gyro(PORT7);
 
@@ -178,12 +177,9 @@ void checkTorque(){
   double motor_torque_RMB = RMB.torque(torqueUnits::Nm);
   double motor_torque_RMM = RMM.torque(torqueUnits::Nm);
   double motor_torque_RMF = RMF.torque(torqueUnits::Nm);
-  double motor_torque_FI = FI.torque(torqueUnits::Nm);
-  double pmotor_torque_HI = HI.torque(torqueUnits::Nm);
-  double motor_torque_TI = TI.torque(torqueUnits::Nm);
-  double motor_torque[] = {motor_torque_LMB, motor_torque_LMF,motor_torque_LMM,motor_torque_RMB,motor_torque_RMF,motor_torque_RMM, motor_torque_FI, motor_torque_HI, motor_torque_TI};
+  double motor_torque[] = {motor_torque_LMB, motor_torque_LMF,motor_torque_LMM,motor_torque_RMB,motor_torque_RMF,motor_torque_RMM};
   std::vector<int> motorsIncluded;
-  std::string motorNames[] = { "LMB", "LMF", "LMM", "RMB", "RMF", "RMM", "FI", "HI", "TI"};
+  std::string motorNames[] = { "LMB", "LMF", "LMM", "RMB", "RMF", "RMM" };
   Brain.Screen.clearScreen();
   Brain.Screen.setCursor(1, 1);
   Brain.Screen.setPenColor(color::white);
@@ -199,11 +195,6 @@ void checkTorque(){
   Brain.Screen.newLine();
   Brain.Screen.print("RMF Torque: %.2f Nm", motor_torque_RMF);
   Brain.Screen.newLine();
-  Brain.Screen.print("FI Torque: %.2f Nm", motor_torque_FI);
-  Brain.Screen.newLine();
-  Brain.Screen.print("HI Torque: %.2f Nm", motor_torque_HI);
-  Brain.Screen.newLine();
-  Brain.Screen.print("TI Torque: %.2f Nm", motor_torque_TI);
   Brain.Screen.print("LOW TOURQUE MOTORS:");
   for (int i = 0; i < 6; ++i) {
     if (motor_torque[i] < 1.2) {
@@ -230,12 +221,9 @@ void checkSpeed(){
   double motor_velocity_RMB = RMB.velocity(velocityUnits::rpm);
   double motor_velocity_RMM = RMM.velocity(velocityUnits::rpm);
   double motor_velocity_RMF = RMF.velocity(velocityUnits::rpm);
-  double motor_velocity_FI = FI.velocity(velocityUnits::rpm);
-  double pmotor_velocity_HI = HI.velocity(velocityUnits::rpm);
-  double motor_velocity_TI = TI.velocity(velocityUnits::rpm);
-  double motor_velocity[] = {motor_velocity_LMB, motor_velocity_LMM,motor_velocity_LMF,motor_velocity_RMB,motor_velocity_RMM,motor_velocity_RMF, motor_velocity_FI, motor_veocity_HI, motor_veocity_TI};
+  double motor_speed[] = {motor_velocity_LMB, motor_velocity_LMM,motor_velocity_LMF,motor_velocity_RMB,motor_velocity_RMM,motor_velocity_RMF};
   std::vector<int> motorsIncluded;
-  std::string motorNames[] = { "LMB", "LMM", "LMF", "RMB", "RMM", "RMF", "FI", "HI", "TI"};
+  std::string motorNames[] = { "LMB", "LMM", "LMF", "RMB", "RMM", "RMF" };
   Brain.Screen.setCursor(1,30);
   Brain.Screen.setPenColor(color::white);
   Brain.Screen.print("LMB velocity: %.2f rpm", motor_velocity_LMB);
@@ -278,12 +266,9 @@ void checkTempature(){
   double motor_temp_RMB = RMB.temperature(temperatureUnits::celsius);
   double motor_temp_RMM = RMM.temperature(temperatureUnits::celsius);
   double motor_temp_RMF = RMF.temperature(temperatureUnits::celsius);
-  double motor_temp_FI = HI.temperature(temperatureUnits::celsius);
-  double motor_temp_HI = HI.temperature(temperatureUnits::celsius);
-  double motor_temp_TI = TI.temperature(temperatureUnits::celsius);
-  double motor_temp[] = {motor_temp_LMB, motor_temp_LMM,motor_temp_LMF,motor_temp_RMB,motor_temp_RMM,motor_temp_RMF, motor_temp_FI, motor_temp_HI, motor_temp_TI};
+  double motor_temp[] = {motor_temp_LMB, motor_temp_LMM,motor_temp_LMF,motor_temp_RMB,motor_temp_RMM,motor_temp_RMF};
   std::vector<int> motorsIncluded;
-  std::string motorNames[] = { "LMB", "LMM", "LMF", "RMB", "RMM", "RMF", "FI", "HI", "TI};
+  std::string motorNames[] = { "LMB", "LMM", "LMF", "RMB", "RMM", "RMF" };
   Brain.Screen.setCursor(1,65);
   Brain.Screen.setPenColor(color::white);
   Brain.Screen.print("LMB temp: %.2f C", motor_temp_LMB);
@@ -297,14 +282,6 @@ void checkTempature(){
   Brain.Screen.print("RMM temp: %.2f C", motor_temp_RMM);
   Brain.Screen.newLine();
   Brain.Screen.print("RMF temp: %.2f C", motor_temp_RMF);
-  Brain.Screen.newLine();
-  Brain.Screen.print("FI temp: %.2f C", motor_temp_FI);
-  Brain.Screen.newLine();
-  Brain.Screen.newLine();
-  Brain.Screen.print("HI temp: %.2f C", motor_temp_HI);
-  Brain.Screen.newLine();
-  Brain.Screen.newLine();
-  Brain.Screen.print("TI temp: %.2f C", motor_temp_TI);
   Brain.Screen.setPenColor(color::orange);
   Brain.Screen.newLine();
   Brain.Screen.print("HIGH TEMPERATURE MOTORS:");
@@ -325,61 +302,8 @@ void checkTempature(){
       Brain.Screen.newLine();
     }
   
-
+  drive_brake();
   }
-void checkCurrent(){
-  double current_LMB = LMB.current();
-  double current_LMM = LMM.current();
-  double current_LMF = LMF.current();
-  double current_RMB = RMB.current();
-  double current_RMM = RMM.current();
-  double current_RMF = RMF.current();
-  double current_FI = HI.temperature(temperatureUnits::celsius);
-  double current_HI = HI.temperature(temperatureUnits::celsius);
-  double current_TI = TI.temperature(temperatureUnits::celsius);
-  double motor_current[] = {current_LMB, current_LMM,current_LMF,current_RMB,current_RMM,current_RMF, current_FI, current_HI, current_TI};
-  std::vector<int> motorsIncluded;
-  std::string motorNames[] = { "LMB", "LMM", "LMF", "RMB", "RMM", "RMF", "FI", "HI", "TI};
-  Brain.Screen.setCursor(1,95);
-  Brain.Screen.setPenColor(color::white);
-  Brain.Screen.print("LMB current: %.2f C", current_LMB);
-  Brain.Screen.newLine();
-  Brain.Screen.print("LMM current: %.2f C", current_LMM);
-  Brain.Screen.newLine();
-  Brain.Screen.print("LMF current: %.2f C", current_LMF);
-  Brain.Screen.newLine();
-  Brain.Screen.print("RMB current: %.2f C", current_RMB);
-  Brain.Screen.newLine();
-  Brain.Screen.print("RMM current: %.2f C", current_RMM);
-  Brain.Screen.newLine();
-  Brain.Screen.print("RMF current: %.2f C", current_RMF);
-  Brain.Screen.newLine();
-  Brain.Screen.print("FI current: %.2f C", current_FI);
-  Brain.Screen.newLine();
-  Brain.Screen.newLine();
-  Brain.Screen.print("HI temp: %.2f C", current_HI);
-  Brain.Screen.newLine();
-  Brain.Screen.newLine();
-  Brain.Screen.print("TI temp: %.2f C", current_TI);
-  Brain.Screen.setPenColor(color::orange);
-  Brain.Screen.newLine();
-  Brain.Screen.print("EXTREME CURRENT MOTORS:");
-  Brain.Screen.newLine();
-  for (int i = 0; i < 6; ++i) {
-    if (motor_current[i] <0.5 ||motor_current[i] >2) {
-      motorsIncluded.push_back(i);
-    }
-  }
-  if (motorsIncluded.empty()){
-      Brain.Screen.setPenColor(color::white);
-      Brain.Screen.print("NONE");
-  }
-  else {
-    Brain.Screen.setPenColor(color::red);
-    for (int idx : motorsIncluded) {
-      Brain.Screen.print(" %s(%.2f)", motorNames[idx].c_str(), motor_temp[idx]);
-      Brain.Screen.newLine();
-    }
 }
 double x_pos_original = 107.6;
 double y_pos_original = 28.9;
@@ -442,71 +366,43 @@ void GUI_selection(){
 }
 void store_in_hoard(int time){
   int timeout =0;
-  while(DistanceSensor2.objectDistance(inches)<0.75 && DistanceSensor2.objectDistance(inches)>= 0.0 && timeout < 200){
     FI.spin(forward, 12000,voltageUnits::mV);
     HI.spin(forward, 12000,voltageUnits::mV);
-    task::sleep(time);
-   timeout+=20;
-  }
-  if(DistanceSensor2.objectDistance(inches)<0.75 && DistanceSensor2.objectDistance(inches)>= 0.0 && DistanceSensor.objectDistance(inches)>0.75&& timeout < 200){
+    task::sleep(4000);
     FI.spin(reverse, 12000,voltageUnits::mV);
-    HI.spin(forward, 12000,voltageUnits::mV);
     TI.spin(reverse, 12000,voltageUnits::mV);
     task::sleep(20);
-   timeout+=20;
-  }
-  task::sleep(time);
-   stop_intake();
+    task::sleep(time);
+    stop_intake();
 }
 void score_middle(int time){
-  int timeout = 0;
-  while(DistanceSensor.objectDistance(inches)<0.75 && DistanceSensor.objectDistance(inches)>= 0.0 && timeout < 200){
+    time = 4000;
     FI.spin(reverse,12000,voltageUnits::mV);
-    task::sleep(20);
-    timeout+=20;
-  }
-  if (DistanceSensor.objectDistance(inches)>0.75){
+    task::sleep(4000);
     FI.spin(reverse,12000,voltageUnits::mV);
     HI.spin(reverse,12000,voltageUnits::mV);
-    task::sleep(20);
-    timeout+=20;
-  }
-  task::sleep(20);
-  stop_intake();
+    task::sleep(time);
+    stop_intake();
 }  
 void score_lower(int time){
-  int timeout = 0;
-  while(DistanceSensor.objectDistance(inches)<0.75 &&  DistanceSensor.objectDistance(inches)>= 0.0 && timeout < 200){
     FI.spin(forward,12000,voltageUnits::mV);
     HI.spin(forward,1200,voltageUnits::mV);
-    task::sleep(20);
-    timeout+=20;
-}
-  if(DistanceSensor.objectDistance(inches)>0.75){
+    task::sleep(4000);
     FI.spin(forward,12000,voltageUnits::mV);
     HI.spin(forward,12000,voltageUnits::mV);
-    task::sleep(20);
-    timeout+=20;
-  }
-   task::sleep(20);
-   stop_intake();
+    task::sleep(time);
+    stop_intake();
 }
 void score_long_goal(int time){
-  int timeout = 0;
-    while(DistanceSensor.objectDistance(inches)<0.75 && DistanceSensor.objectDistance(inches)> 0.0 && timeout < 200){
     FI.spin(forward,12000,voltageUnits::mV);
     TI.spin(forward,12000,voltageUnits::mV);
-    task::sleep(20);
-    timeout+=20;
-}
-  if(DistanceSensor.objectDistance(inches)>0.75){
+    task::sleep(4000);
     FI.spin(forward,12000,voltageUnits::mV);
     TI.spin(forward,12000,voltageUnits::mV);
     HI.spin(forward,12000,voltageUnits::mV);
-    timeout+=20;
-  }
-  task::sleep(20);
-   stop_intake();
+
+    task::sleep(20);
+    stop_intake();
 }
 void go_to_long_goal(){
   if (selected_corner == Corner::left_red || selected_corner == Corner::right_blue){
@@ -764,17 +660,15 @@ void usercontrol(void) {
   bool toggle_scrapper_old = false;
   bool toggle_hood_new = true;
   bool toggle_hood_old = false;
-  bool toggle_descore_new = true;
-  bool toggle_descore_old = false;
-  double forward = Controller1.axis2.position(precent);
-  double turn = Controller1.axis4.position(precent);
+  double forward = Controller1.Axis2.position(percent);
+  double turn = Controller1.Axis4.position(percent);
   double turnSensitivity = 1.0 - (fabs(forward) / 100.0) * 0.6;
-  double turn *= turnSensitivity;
+  double turn = turnSensitivity*turn;
   double rightSpeed = ((forward+turn)/1200)*100;
   double leftSpeed = ((forward-turn)/1200)*100;
   while (1) {
     drive(rightSpeed, leftSpeed);
-    task::sleep(20):
+    task::sleep(20);
     if (Controller1.ButtonR1.pressing()){
       stop_intake();
       task::sleep(10);
@@ -816,20 +710,6 @@ void usercontrol(void) {
         task::sleep(10);
         hood.set(false);
         toggle_hood_new= !toggle_hood_new;        
-      }
-    }
-      task::sleep(20); 
-  }
-  if (Controller1.ButtonC.pressing())
-      if (toggle_descore_old == false && toggle_descore_new == true){
-        task::sleep(10);
-        hood.set(true);
-        toggle_descore_new = !toggle_descore_new;
-      }
-      if (toggle_descore_new == false && toggle_descore_old==true){
-        task::sleep(10);
-        hood.set(false);
-        toggle_descore_new= !toggle_descore_new;        
       }
     }
       task::sleep(20); 
