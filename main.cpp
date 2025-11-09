@@ -388,6 +388,9 @@ void colorSort(){
       break;
     }
   } 
+  else{
+   return;
+  }
 } 
 void store_in_hoard(int time){
   int timeout =0;
