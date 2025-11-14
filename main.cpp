@@ -688,8 +688,8 @@ void usercontrol(void) {
   double turn = turnSensitivity*turn_input;
 
   while (1) {
-    double rightSpeed = ((forward+turn)/1200)*100;
-    double leftSpeed = ((forward-turn)/1200)*100;
+    double rightSpeed = ((forward+turn)/1200)*1200;
+    double leftSpeed = ((forward-turn)/1200)*12000;
     drive(rightSpeed, leftSpeed);
     task::sleep(20);
     if (Controller1.ButtonR1.pressing()){
