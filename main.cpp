@@ -106,9 +106,9 @@ void PID_drive(double target_dist){
     double abs_error = fabs(error);
     double abs_derivative = fabs(derivative);
     double abs_intergral = fabs(intergral);
-    double KP = 0.90 + 4.60 * (exp(-abs_error / 3));
-    double KD = 0.08 + 0.40 * (exp(-abs_derivative / 4));
-    double KI = 0.0005 + 0.015 * (exp(-abs_intergral / 5));
+    double KP = 0.90 +  9* (exp(-abs_error / 1));
+    double KD = 0.08 +  2* (exp(-abs_derivative / 3));
+    double KI = 0.0005 + 0.45* (exp(-abs_intergral / 4));
     if (fabs(intergral)>1000){
       intergral=1000*(intergral/fabs(intergral));
     }
@@ -147,9 +147,9 @@ void Gyro_turn(double target_angle, bool gyro_reset){
     double abs_t_derivative = fabs(t_derivative);
     double abs_t_intergral = fabs(t_intergral);
     // KP,KI,KD
-    double TKP = 0.9 + 4.6 * (exp(-abs_t_error / 1));
-    double TKD = 0.10 + 0.4 * (exp(-abs_t_derivative / .1));
-    double TKI = 0.00001 + 0.008 * (exp(-abs_t_intergral/.2));
+    double TKP = 0.9 + 9 * (exp(-abs_t_error / 1));
+    double TKD = 0.10 + 2 * (exp(-abs_t_derivative / .1));
+    double TKI = 0.00001 + 0.03 * (exp(-abs_t_intergral/.2));
     if (fabs(t_intergral)>1000){
       t_intergral=1000*(t_intergral/fabs(t_intergral));
     }
