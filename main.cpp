@@ -33,7 +33,7 @@ motor RMF(PORT6, gearSetting::ratio18_1,false);
 digital_out scraper(Brain.ThreeWirePort.A);
 digital_out hood(Brain.ThreeWirePort.B);
 // Gyro
-optical Optical = optical(PORT3);
+optical Optical = optical(PORT11);
 inertial Gyro(PORT7);
 
 motor FI(PORT8, gearSetting::ratio18_1, false);
@@ -312,9 +312,9 @@ void point_drive(double x_pos, double y_pos, double angle_orentaiton){
   double target_angle_ptp = atan2(differencey, differencex) * (180.0 / pi);
   double target_dist_ptp = sqrt(pow(differencex, 2)+pow(differencey, 2));    
   Gyro_turn(target_angle_ptp, false);
-  task::sleep(0.5);
+  task::sleep(1);
   PID_drive(target_dist_ptp);   
-  task::sleep(0.5);
+  task::sleep(1);
   Gyro_turn(angle_orentaiton, false);
   x_pos_original=x_pos;
   y_pos_original=y_pos;
@@ -378,13 +378,13 @@ void score_middle(int time){
 } 
 void colorSort(){
   if (match_auton==true){
-    while (Optical.color() == red && Feildside == true || Optical.color() == blue && Feildside == false){
+    while ((Optical.color() == red && Feildside == true) || (Optical.color() == blue && Feildside == false)){
       score_middle(infinity2);
     }
-    while (Optical.color() == red && Feildside == false || Optical.color() == blue && Feildside == true){
+    while ((Optical.color() == red && Feildside == false) || (Optical.color() == blue && Feildside == true)){
       break;
     }
-    while (Optical.color()!= red && Optical.color()!=blue){
+    while ((Optical.color()!= red )&& (Optical.color()!=blue)){
       break;
     }
   } 
@@ -529,7 +529,7 @@ void go_pick_up_those_three_blocks2(){
 void pre_auton(void) {
   int timeout = 0;
   Gyro.calibrate();
-  task::sleep(0.1); 
+  task::sleep(15); 
   while(Gyro.isCalibrating() && timeout <2000) {
     task::sleep(500); 
     timeout+=500;
@@ -683,20 +683,23 @@ void usercontrol(void) {
   bool toggle_hood_new = true;
   bool toggle_hood_old = false;
   double forward = Controller1.Axis2.position(percent);
-  double turn = Controller1.Axis4.position(percent);
+  double turn_input = Controller1.Axis4.position(percent);
   double turnSensitivity = 1.0 - (fabs(forward) / 100.0) * 0.6;
-  double turn = turnSensitivity*turn;
-  double rightSpeed = ((forward+turn)/1200)*100;
-  double leftSpeed = ((forward-turn)/1200)*100;
+  double turn = turnSensitivity*turn_input;
+
   while (1) {
+    double rightSpeed = ((forward+turn)/1200)*100;
+    double leftSpeed = ((forward-turn)/1200)*100;
     drive(rightSpeed, leftSpeed);
     task::sleep(20);
     if (Controller1.ButtonR1.pressing()){
+      task::sleep(15);
       stop_intake();
       task::sleep(10);
       score_long_goal(infinity2);
     }
     if (Controller1.ButtonR2.pressing()){
+      task::sleep(15);
      task::sleep(10);
       stop_intake();
       store_in_hoard(infinity2);
@@ -712,30 +715,37 @@ void usercontrol(void) {
       score_lower(infinity2);
     }
     if (Controller1.ButtonA.pressing()){
+      task::sleep(15);
       if (toggle_scrapper_new == true && toggle_scrapper_old == false){
         task::sleep(10);
         scraper.set(true);
         toggle_scrapper_old = !toggle_scrapper_old;
+        toggle_hood_new = !toggle_hood_new;
       }
       if (toggle_scrapper_new == false && toggle_scrapper_old == true){
         task::sleep(10);
         scraper.set(false);
         toggle_scrapper_old = !toggle_scrapper_old;        
+        toggle_hood_new = !toggle_hood_new;
       }
-    if (Controller1.ButtonB.pressing())
+    }
+    if (Controller1.ButtonB.pressing()){
       if (toggle_hood_old == false && toggle_hood_new == true){
         task::sleep(10);
         hood.set(true);
         toggle_hood_new = !toggle_hood_new;
+        toggle_scrapper_old = !toggle_hood_old;
       }
       if (toggle_hood_new == false && toggle_hood_old==true){
         task::sleep(10);
         hood.set(false);
         toggle_hood_new= !toggle_hood_new;        
+        toggle_scrapper_old = !toggle_scrapper_old;
       }
     }
       task::sleep(20); 
-  }
+  
+}
 }
 
 int main() {
