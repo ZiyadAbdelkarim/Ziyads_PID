@@ -21,6 +21,7 @@ controller Controller1;
 bool regularPID = false;
 bool match_auton = false;
 bool Feildside = false;
+double dist_travled;
 // Left motors
 motor LMB(PORT1, gearSetting::ratio18_1,true);
 motor LMM(PORT2, gearSetting::ratio18_1,true);
@@ -35,7 +36,11 @@ digital_out hood(Brain.ThreeWirePort.B);
 // Gyro
 optical Optical = optical(PORT11);
 inertial Gyro(PORT7);
-
+distance Dist0deg(PORT12);
+distance Dist90dgeg(PORT13);
+distance Dist180deg(PORT13);
+distance Dist270dgeg(PORT13);
+double Distreading = Dist0deg.objectDistance(inches);
 motor FI(PORT8, gearSetting::ratio18_1, false);
 motor HI(PORT9, gearSetting::ratio18_1, false);
 motor TI(PORT10, gearSetting::ratio18_1, false);
@@ -75,12 +80,14 @@ void drive_brake(){
   RMF.stop(brake);
 }
 void reset_drive(){
-  LMB.resetPosition();
-  LMM.resetPosition();
-  LMF.resetPosition();
-  RMB.resetPosition();
-  RMM.resetPosition();
-  RMF.resetPosition();
+  // LMB.resetPosition();
+  // LMM.resetPosition();
+  // LMF.resetPosition();
+  // RMB.resetPosition();
+  // RMM.resetPosition();
+  // RMF.resetPosition();
+  double dist_travled = 0;
+  
 }
 // Constants
 double wheel_dia = 3.25;
@@ -93,22 +100,24 @@ void PID_drive(double target_dist){
   double intergral = 0.0;
   double derivative = 0.0;
   double prev_error = 0.0;
-  double dist_travled = 0.0;
 // KP,KI,KD
   int timer = 0;
   while (fabs(error)>0.5 && timer <=5000){
-    double avg_pos_deg = (LMB.position(deg) + LMM.position(deg) + LMF.position(deg) + RMB.position(deg) + RMM.position(deg) + RMF.position(deg))/6;
+    // double avg_pos_deg = (LMB.position(deg) + LMM.position(deg) + LMF.position(deg) + RMB.position(deg) + RMM.position(deg) + RMF.position(deg))/6;
     // degrees - inches
-    dist_travled = (avg_pos_deg/360.0)*circum;
+    dist_travled = target_dist-Distreading;
     error = target_dist-dist_travled;
     derivative = error - prev_error;
     intergral += error;
     double abs_error = fabs(error);
     double abs_derivative = fabs(derivative);
     double abs_intergral = fabs(intergral);
-    double KP = 0.90 +  9* (exp(-abs_error / 1));
-    double KD = 0.08 +  2* (exp(-abs_derivative / 3));
-    double KI = 0.0005 + 0.45* (exp(-abs_intergral / 4));
+    double KP = 4.5;
+    double KD = 83;
+    double KI = .01;
+    // double KP = 0.90 +  9* (exp(-abs_error / 1));
+    // double KD = 0.08 +  2* (exp(-abs_derivative / 3));
+    // double KI = 0.0005 + 0.45* (exp(-abs_intergral / 4));
     if (fabs(intergral)>1000){
       intergral=1000*(intergral/fabs(intergral));
     }
@@ -147,9 +156,12 @@ void Gyro_turn(double target_angle, bool gyro_reset){
     double abs_t_derivative = fabs(t_derivative);
     double abs_t_intergral = fabs(t_intergral);
     // KP,KI,KD
-    double TKP = 0.9 + 9 * (exp(-abs_t_error / 1));
-    double TKD = 0.10 + 2 * (exp(-abs_t_derivative / .1));
-    double TKI = 0.00001 + 0.03 * (exp(-abs_t_intergral/.2));
+    double TKP = 4.5;
+    double TKD = 83;
+    double TKI = .01;
+    // double TKP = 0.9 + 9 * (exp(-abs_t_error / 1));
+    // double TKD = 0.10 + 2 * (exp(-abs_t_derivative / .1));
+    // double TKI = 0.00001 + 0.03 * (exp(-abs_t_intergral/.2));
     if (fabs(t_intergral)>1000){
       t_intergral=1000*(t_intergral/fabs(t_intergral));
     }
@@ -311,6 +323,18 @@ void point_drive(double x_pos, double y_pos, double angle_orentaiton){
   double differencey = y_pos - y_pos_original;
   double target_angle_ptp = atan2(differencey, differencex) * (180.0 / pi);
   double target_dist_ptp = sqrt(pow(differencex, 2)+pow(differencey, 2));    
+if (target_angle_ptp>0 && target_angle_ptp<=90){
+  Distreading = Dist90dgeg.objectDistance(inches);
+}
+if (target_angle_ptp==0){
+  Distreading = Dist0deg.objectDistance(inches);
+}
+if (target_angle_ptp>90 && target_angle_ptp<=180){
+  Distreading = Dist180deg.objectDistance(inches);
+}
+if (target_angle_ptp>180 && target_angle_ptp<=270){
+  Distreading = Dist270dgeg.objectDistance(inches);
+}
   Gyro_turn(target_angle_ptp, false);
   task::sleep(1);
   PID_drive(target_dist_ptp);   
@@ -318,7 +342,7 @@ void point_drive(double x_pos, double y_pos, double angle_orentaiton){
   Gyro_turn(angle_orentaiton, false);
   x_pos_original=x_pos;
   y_pos_original=y_pos;
-    
+  
   }
 enum class Corner{left_red,right_red,left_blue,right_blue, not_selected };
 Corner selected_corner = Corner::not_selected; 
@@ -746,7 +770,7 @@ void usercontrol(void) {
       task::sleep(20); 
   
 }
-}
+} 
 
 int main() {
   Competition.autonomous(autonomous);
