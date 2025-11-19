@@ -80,12 +80,12 @@ void drive_brake(){
   RMF.stop(brake);
 }
 void reset_drive(){
-  // LMB.resetPosition();
-  // LMM.resetPosition();
-  // LMF.resetPosition();
-  // RMB.resetPosition();
-  // RMM.resetPosition();
-  // RMF.resetPosition();
+  LMB.resetPosition();
+  LMM.resetPosition();
+  LMF.resetPosition();
+  RMB.resetPosition();
+  RMM.resetPosition();
+  RMF.resetPosition();
   double dist_travled = 0;
   
 }
@@ -103,10 +103,9 @@ void PID_drive(double target_dist){
 // KP,KI,KD
   int timer = 0;
   while (fabs(error)>0.5 && timer <=5000){
-    // double avg_pos_deg = (LMB.position(deg) + LMM.position(deg) + LMF.position(deg) + RMB.position(deg) + RMM.position(deg) + RMF.position(deg))/6;
+    double avg_pos_deg = (LMB.position(deg) + LMM.position(deg) + LMF.position(deg) + RMB.position(deg) + RMM.position(deg) + RMF.position(deg))/6;
     // degrees - inches
-    dist_travled = target_dist-Distreading;
-    error = target_dist-dist_travled;
+    error= target_dist-Distreading;
     derivative = error - prev_error;
     intergral += error;
     double abs_error = fabs(error);
