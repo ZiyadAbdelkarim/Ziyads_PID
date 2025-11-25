@@ -37,9 +37,6 @@ digital_out hood(Brain.ThreeWirePort.B);
 optical Optical = optical(PORT11);
 inertial Gyro(PORT7);
 distance Dist0deg(PORT12);
-distance Dist90dgeg(PORT13);
-distance Dist180deg(PORT13);
-distance Dist270dgeg(PORT13);
 double Distreading = Dist0deg.objectDistance(inches);
 motor FI(PORT8, gearSetting::ratio18_1, false);
 motor HI(PORT9, gearSetting::ratio18_1, false);
@@ -105,7 +102,8 @@ void PID_drive(double target_dist){
   while (fabs(error)>0.5 && timer <=5000){
     double avg_pos_deg = (LMB.position(deg) + LMM.position(deg) + LMF.position(deg) + RMB.position(deg) + RMM.position(deg) + RMF.position(deg))/6;
     // degrees - inches
-    error= target_dist-Distreading;
+    double targetDistfromFeild = Distreading-target_dist;
+    error= targetDistfromFeild-Distreading;
     derivative = error - prev_error;
     intergral += error;
     double abs_error = fabs(error);
@@ -322,18 +320,6 @@ void point_drive(double x_pos, double y_pos, double angle_orentaiton){
   double differencey = y_pos - y_pos_original;
   double target_angle_ptp = atan2(differencey, differencex) * (180.0 / pi);
   double target_dist_ptp = sqrt(pow(differencex, 2)+pow(differencey, 2));    
-if (target_angle_ptp>0 && target_angle_ptp<=90){
-  Distreading = Dist90dgeg.objectDistance(inches);
-}
-if (target_angle_ptp==0){
-  Distreading = Dist0deg.objectDistance(inches);
-}
-if (target_angle_ptp>90 && target_angle_ptp<=180){
-  Distreading = Dist180deg.objectDistance(inches);
-}
-if (target_angle_ptp>180 && target_angle_ptp<=270){
-  Distreading = Dist270dgeg.objectDistance(inches);
-}
   Gyro_turn(target_angle_ptp, false);
   task::sleep(1);
   PID_drive(target_dist_ptp);   
@@ -558,7 +544,7 @@ void pre_auton(void) {
     timeout+=500;
   }
   timeout=0;
-  GUI_selection();
+  //GUI_selection();
 }
 void autonomous(void) {
   if (regularPID){
