@@ -21,7 +21,7 @@ controller Controller1;
 bool regularPID = false;
 bool match_auton = false;
 bool Feildside = false;
-double dist_travled;
+// double dist_travled;
 // Left motors
 motor LMB(PORT1, gearSetting::ratio18_1,true);
 motor LMM(PORT2, gearSetting::ratio18_1,true);
@@ -36,8 +36,8 @@ digital_out hood(Brain.ThreeWirePort.B);
 // Gyro
 optical Optical = optical(PORT11);
 inertial Gyro(PORT7);
-distance Dist0deg(PORT12);
-double Distreading = Dist0deg.objectDistance(inches);
+distance Dist(PORT12);
+double Distreading = Dist.objectDistance(inches);
 motor FI(PORT8, gearSetting::ratio18_1, false);
 motor HI(PORT9, gearSetting::ratio18_1, false);
 motor TI(PORT10, gearSetting::ratio18_1, false);
@@ -83,7 +83,7 @@ void reset_drive(){
   RMB.resetPosition();
   RMM.resetPosition();
   RMF.resetPosition();
-  double dist_travled = 0;
+  double erro;
   
 }
 // Constants
